@@ -15,10 +15,10 @@ export var trigger_id;
 
 // rc state
 export const rc_states = {
-  'RC_STATE_UNDEFINED':0,
-  'RC_STATE_HALT':1,
-  'RC_STATE_GO':2,
-  'RC_STATE_QUIT':3
+  'RC_STATE_UNDEFINED': 0,
+  'RC_STATE_HALT':      1,
+  'RC_STATE_GO':        2,
+  'RC_STATE_QUIT':      3
 };
 Object.freeze(rc_states);
 
