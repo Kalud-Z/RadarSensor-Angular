@@ -4,30 +4,41 @@
 
 
 // graphics state
+import { states_struct, status_clearall, status_iscomplete } from './basics';
+import { cfg_parameters_states, init_parameters } from './config_params';
+import { controls_states, display_mode, display_mode_list, display_node_index_list, init_controls } from './controls';
+import { request_initial_config } from './commands';
+import { arraybuffer2type_header, TYPE_HEADER_SIZE_BYTES } from './headers';
+
 export const graphics_states = [
   states_struct('GRAPHICS_STATE_NODES_NAMES',		0),
   states_struct('GRAPHICS_STATE_NODES_OMODES',	0),
   states_struct('GRAPHICS_STATE_SCALES',			0)
 ];
 
-export var nodes_names;
-export var nodes_omodes;
-export var nodes_headers;
+export let nodes_names;
+export function set_nodes_names(n) { nodes_names = n }
+
+export let nodes_omodes;
+export function set_nodes_omodes(n) { nodes_omodes = n }
+
+
+export let nodes_headers;
 
 // default values
 // scales
-export var SCALE_FONT = "sans-serif";
-export var SCALE_FONTSIZE = 10;
-export var SCALE_FILLSTYLE = "black";
-export var SCALE_TICKLENGTH = 10;
-export var SCALE_TICK2TEXT_DISTANCE = 0.2 * SCALE_FONTSIZE;
-export var SCALE_DECIMAL_PLACES = 1;
-export var SCALE_DIVS_BETWEEN_LONG_TICKS = 5;
+export let SCALE_FONT = "sans-serif";
+export let SCALE_FONTSIZE = 10;
+export let SCALE_FILLSTYLE = "black";
+export let SCALE_TICKLENGTH = 10;
+export let SCALE_TICK2TEXT_DISTANCE = 0.2 * SCALE_FONTSIZE;
+export let SCALE_DECIMAL_PLACES = 1;
+export let SCALE_DIVS_BETWEEN_LONG_TICKS = 5;
 // resolution
-export var RESOLUTION_DECIMAL_PLACES = 3;
+export let RESOLUTION_DECIMAL_PLACES = 3;
 
 // colorbar
-export var COLORBAR_SLIDER_DEFAULT_VALUES = [
+export let COLORBAR_SLIDER_DEFAULT_VALUES = [
   255 * 0.40,
   255 * 0.50,
   255 * 0.60,
@@ -35,95 +46,101 @@ export var COLORBAR_SLIDER_DEFAULT_VALUES = [
   255 * 0.80
 ];
 
-export var COLORBAR_SCALE_MIN = 0;
-export var COLORBAR_SCALE_MAX = 140;
-export var COLORBAR_SCALE_DECIMAL_PLACES = 0;
+export let COLORBAR_SCALE_MIN = 0;
+export let COLORBAR_SCALE_MAX = 140;
+export let COLORBAR_SCALE_DECIMAL_PLACES = 0;
 
 // CFAR colors
 // color for areas without target
-export var CFAR_NO_TARGET_COLOR = 0xFFFF0000;
+export let CFAR_NO_TARGET_COLOR = 0xFFFF0000;
 // highlight color for CFAR targets in combined display mode
-export var CFAR_HIGHLIGHT_COLOR = 0xFF0000FF;
+export let CFAR_HIGHLIGHT_COLOR = 0xFF0000FF;
 // transparency for pixels not on a CFAR target in combined display mode
-export var CFAR_TRANSPARENT_COLOR = 0x00000000;
+export let CFAR_TRANSPARENT_COLOR = 0x00000000;
 
 
 // incoming data type/size/start/range
-export var data_datatype;
-export var data_bitwidth;
-export var data_image_size_x;
-export var data_image_size_y;
-export var data_image_start_x;
-export var data_image_start_y;
-export var data_image_range_x;
-export var data_image_range_y;
+export let data_datatype;
+export let data_bitwidth;
+export let data_image_size_x;
+export let data_image_size_y;
+export let data_image_start_x;
+export let data_image_start_y;
+export let data_image_range_x;
+export let data_image_range_y;
 
 // image position / size
-export var image_data_offset_x;
-export var image_data_size_x;
-export var image_data_offset_y;
-export var image_data_size_y;
+export let image_data_offset_x;
+export let image_data_size_x;
+export let image_data_offset_y;
+export let image_data_size_y;
 
 // scales
-export var scale_legend_x;
-export var scale_legend_y;
-export var scale_world_start_x;
-export var scale_world_start_y;
-export var scale_world_range_x;
-export var scale_world_range_y;
+export let scale_legend_x;
+export let scale_legend_y;
+export let scale_world_start_x;
+export let scale_world_start_y;
+export let scale_world_range_x;
+export let scale_world_range_y;
 
 // resolution / bin
-export var res_x;
-export var res_y;
+export let res_x;
+export let res_y;
 
 // canvas data
-export var image_scale_canvas;
-export var image_scale_canvas_ctx;
+export let image_scale_canvas;
+export let image_scale_canvas_ctx;
 
-export var colorbar_scale_canvas;
-export var colorbar_scale_canvas_ctx;
+export let colorbar_scale_canvas;
+export let colorbar_scale_canvas_ctx;
 
-export var image_rdmap_canvas;
-export var image_rdmap_canvas_ctx;
-export var imgdata_rdmap_canvas;
-export var imgdata_rdmap_canvas_ctx;
-export var imgdata_rdmap;
+export let image_rdmap_canvas;
+export let image_rdmap_canvas_ctx;
+export let imgdata_rdmap_canvas;
+export let imgdata_rdmap_canvas_ctx;
+export let imgdata_rdmap;
 
-export var image_cfar_canvas;
-export var image_cfar_canvas_ctx;
-export var imgdata_cfar_canvas;
-export var imgdata_cfar_canvas_ctx;
-export var imgdata_cfar;
+export let image_cfar_canvas;
+export let image_cfar_canvas_ctx;
+export let imgdata_cfar_canvas;
+export let imgdata_cfar_canvas_ctx;
+export let imgdata_cfar;
 
-export var image_cfar_highlight_canvas;
-export var image_cfar_highlight_canvas_ctx;
-export var imgdata_cfar_highlight_canvas;
-export var imgdata_cfar_highlight_canvas_ctx;
-export var imgdata_cfar_highlight;
+export let image_cfar_highlight_canvas;
+export let image_cfar_highlight_canvas_ctx;
+export let imgdata_cfar_highlight_canvas;
+export let imgdata_cfar_highlight_canvas_ctx;
+export let imgdata_cfar_highlight;
+
+let scaled_rgbatable;
+
 
 
 // return the width of a text in number of pixels
-export function getWidthOfText(txt, fontname, fontsize){
+export function getWidthOfText(txt, fontname, fontsize) {
   // Create a dummy canvas (render invisible with css)
-  var c=document.createElement('canvas');
+  let c = document.createElement('canvas');
   // Get the context of the dummy canvas
-  var ctx=c.getContext('2d');
+  let ctx = c.getContext('2d');
   // Set the context.font to the font that you are using
   ctx.font = fontsize + 'px' + fontname;
   // Measure the string
-  var length = ctx.measureText(txt).width;
+  let length = ctx.measureText(txt).width;
   return length;
 }
 
 
 export function set_data_invalid_marker() {
-  $('#grid_graphics_container').css('border-color', 'red');
+  // $('#grid_graphics_container').css('border-color', 'red');
+  document.getElementById('grid_graphics_container').style.borderColor = 'red';
 }
 
 
 export function clear_data_invalid_marker() {
-  $('#grid_graphics_container').css('border-color', '');
+  // $('#grid_graphics_container').css('border-color', '');
+  document.getElementById('grid_graphics_container').style.borderColor = '';
 }
+
 
 // draw a scale
 // scale_pos_x/y: Start position / pixels of scale line inside canvas
@@ -139,96 +156,113 @@ export function clear_data_invalid_marker() {
 // bins: number of pixels of the corresponding image's dimension
 // legend: legend text
 export function draw_scale(id_canvas, scale_pos_x, scale_pos_y, scale_size, ticklength, decimal_places, orientation, divs_between_long_ticks, fillstyle, font, fontsize, world_start, world_stop, bins, legend) {
-  var element = document.getElementById(id_canvas);
+  let element: any = document.getElementById(id_canvas);
   if (element.getContext) {
-    var ctx = element.getContext('2d');
+    let ctx = element.getContext('2d');
 
     ctx.fillStyle = fillstyle;
     ctx.font = fontsize + "px " + font;
     ctx.strokeStyle = fillstyle;
 
-    var size_per_bin = scale_size / bins;
-    var image2world_ratio = size_per_bin * (bins - 1) / (world_stop - world_start);
-    var max_scale_value_scale_size = Math.max(getWidthOfText(world_start.toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE), getWidthOfText(world_stop.toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE));
+    let size_per_bin = scale_size / bins;
+    let image2world_ratio = size_per_bin * (bins - 1) / (world_stop - world_start);
+    let max_scale_value_scale_size = Math.max(getWidthOfText(world_start.toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE), getWidthOfText(world_stop.toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE));
+
+    let scale_start_x;
+    let scale_start_y;
+    let tick_scale_pos_x_long;
+    let tick_scale_pos_x_short;
+    let tick_scale_pos_y_long;
+    let tick_scale_pos_y_short;
+    let text_scale_pos_x;
+    let text_scale_pos_y;
+    let axis_line_end_x;
+    let axis_line_end_y;
+    let legend_x;
+    let legend_y;
+    let max_divs;
 
     // calculate default values
     switch (orientation) {
       case "horizontal":
-        var scale_start_x = scale_pos_x + size_per_bin / 2;
-        var scale_start_y = scale_pos_y;
-        var tick_scale_pos_x_long = 0;
-        var tick_scale_pos_x_short = 0;
-        var tick_scale_pos_y_long = ticklength;
-        var tick_scale_pos_y_short = ticklength / 2;
-        var text_scale_pos_x = 0;
-        var text_scale_pos_y = tick_scale_pos_y_long + SCALE_TICK2TEXT_DISTANCE ;
-        var axis_line_end_x = scale_pos_x + scale_size;
-        var axis_line_end_y = scale_pos_y;
-        var legend_x = scale_pos_x + scale_size / 2;
-        var legend_y = scale_pos_y + tick_scale_pos_y_long + 2*SCALE_FONTSIZE;
+        scale_start_x = scale_pos_x + size_per_bin / 2;
+        scale_start_y = scale_pos_y;
+        tick_scale_pos_x_long = 0;
+        tick_scale_pos_x_short = 0;
+        tick_scale_pos_y_long = ticklength;
+        tick_scale_pos_y_short = ticklength / 2;
+        text_scale_pos_x = 0;
+        text_scale_pos_y = tick_scale_pos_y_long + SCALE_TICK2TEXT_DISTANCE ;
+        axis_line_end_x = scale_pos_x + scale_size;
+        axis_line_end_y = scale_pos_y;
+        legend_x = scale_pos_x + scale_size / 2;
+        legend_y = scale_pos_y + tick_scale_pos_y_long + 2*SCALE_FONTSIZE;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        var max_divs = Math.floor(size_per_bin * (bins - 1) / max_scale_value_scale_size);
+        max_divs = Math.floor(size_per_bin * (bins - 1) / max_scale_value_scale_size);
         break;
       case "vertical_right":
-        var scale_start_x = scale_pos_x;
-        var scale_start_y = scale_pos_y - size_per_bin / 2;
-        var tick_scale_pos_x_long = ticklength;
-        var tick_scale_pos_x_short = ticklength / 2;
-        var tick_scale_pos_y_long = 0;
-        var tick_scale_pos_y_short = 0;
-        var text_scale_pos_x = tick_scale_pos_x_long + SCALE_TICK2TEXT_DISTANCE;
-        var text_scale_pos_y = 0;
-        var axis_line_end_x = scale_pos_x;
-        var axis_line_end_y = scale_pos_y + scale_size;
-        var legend_x = scale_pos_x + tick_scale_pos_x_long + max_scale_value_scale_size;
-        var legend_y = scale_pos_y + scale_size / 2;
+        scale_start_x = scale_pos_x;
+        scale_start_y = scale_pos_y - size_per_bin / 2;
+        tick_scale_pos_x_long = ticklength;
+        tick_scale_pos_x_short = ticklength / 2;
+        tick_scale_pos_y_long = 0;
+        tick_scale_pos_y_short = 0;
+        text_scale_pos_x = tick_scale_pos_x_long + SCALE_TICK2TEXT_DISTANCE;
+        text_scale_pos_y = 0;
+        axis_line_end_x = scale_pos_x;
+        axis_line_end_y = scale_pos_y + scale_size;
+        legend_x = scale_pos_x + tick_scale_pos_x_long + max_scale_value_scale_size;
+        legend_y = scale_pos_y + scale_size / 2;
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        var max_divs = size_per_bin * (bins - 1) / fontsize;
+        max_divs = size_per_bin * (bins - 1) / fontsize;
         break;
       case "vertical_left":
-        var scale_start_x = scale_pos_x;
-        var scale_start_y = scale_pos_y - size_per_bin / 2;
-        var tick_scale_pos_x_long = -ticklength;
-        var tick_scale_pos_x_short = -ticklength / 2;
-        var tick_scale_pos_y_long = 0;
-        var tick_scale_pos_y_short = 0;
-        var text_scale_pos_x = tick_scale_pos_x_long - SCALE_TICK2TEXT_DISTANCE;
-        var text_scale_pos_y = 0;
-        var axis_line_end_x = scale_pos_x;
-        var axis_line_end_y = scale_pos_y + scale_size;
-        var legend_x = scale_pos_x + text_scale_pos_x - max_scale_value_scale_size - SCALE_FONTSIZE;
-        var legend_y = scale_pos_y + scale_size / 2;
+        scale_start_x = scale_pos_x;
+        scale_start_y = scale_pos_y - size_per_bin / 2;
+        tick_scale_pos_x_long = -ticklength;
+        tick_scale_pos_x_short = -ticklength / 2;
+        tick_scale_pos_y_long = 0;
+        tick_scale_pos_y_short = 0;
+        text_scale_pos_x = tick_scale_pos_x_long - SCALE_TICK2TEXT_DISTANCE;
+        text_scale_pos_y = 0;
+        axis_line_end_x = scale_pos_x;
+        axis_line_end_y = scale_pos_y + scale_size;
+        legend_x = scale_pos_x + text_scale_pos_x - max_scale_value_scale_size - SCALE_FONTSIZE;
+        legend_y = scale_pos_y + scale_size / 2;
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
-        var max_divs = size_per_bin * (bins - 1) / fontsize;
+        max_divs = size_per_bin * (bins - 1) / fontsize;
         break;
     }
 
     // calculate step size per division for long/short ticklines, snapped to next power of 10
-    var stepsize_per_div = (world_stop - world_start) / max_divs;
-    var stepsize_per_div_log = Math.ceil(Math.log10(stepsize_per_div));
-    var stepsize_per_div_snap_long = Math.pow(10, stepsize_per_div_log);
-    var stepsize_per_div_snap_short = stepsize_per_div_snap_long / divs_between_long_ticks;
+    let stepsize_per_div = (world_stop - world_start) / max_divs;
+    let stepsize_per_div_log = Math.ceil(Math.log10(stepsize_per_div));
+    let stepsize_per_div_snap_long = Math.pow(10, stepsize_per_div_log);
+    let stepsize_per_div_snap_short = stepsize_per_div_snap_long / divs_between_long_ticks;
 
     // step along axis, draw tick lines and values
-    var current_value = Math.ceil(world_start/stepsize_per_div_snap_short) * stepsize_per_div_snap_short;
+    let current_value = Math.ceil(world_start / stepsize_per_div_snap_short) * stepsize_per_div_snap_short;
     while (current_value <= world_stop) {
-
       // calculate world_start position for tick line
+
+      let pos_x;
+      let pos_y;
+
       switch (orientation) {
         case "horizontal":
-          var pos_x = Math.round(scale_start_x + (current_value - world_start) * image2world_ratio);
-          var pos_y = scale_start_y;
+          pos_x = Math.round(scale_start_x + (current_value - world_start) * image2world_ratio);
+          pos_y = scale_start_y;
           break;
         case "vertical_right":
-          var pos_x = scale_start_x;
-          var pos_y = Math.round(scale_start_y + scale_size - (current_value - world_start) * image2world_ratio);
+          pos_x = scale_start_x;
+          pos_y = Math.round(scale_start_y + scale_size - (current_value - world_start) * image2world_ratio);
           break;
         case "vertical_left":
-          var pos_x = scale_start_x;
-          var pos_y = Math.round(scale_start_y + scale_size - (current_value - world_start) * image2world_ratio);
+          pos_x = scale_start_x;
+          pos_y = Math.round(scale_start_y + scale_size - (current_value - world_start) * image2world_ratio);
           break;
       }
 
@@ -237,7 +271,7 @@ export function draw_scale(id_canvas, scale_pos_x, scale_pos_y, scale_size, tick
         // long tick line at current position?
         ctx.beginPath();
         ctx.moveTo(pos_x, pos_y);
-        var tmp_long = current_value / stepsize_per_div_snap_long;
+        let tmp_long = current_value / stepsize_per_div_snap_long;
         if (Math.abs((tmp_long) - Math.round(tmp_long)) < 0.01) {
           // yes: long tickline + value
           ctx.lineTo(pos_x + tick_scale_pos_x_long, pos_y + tick_scale_pos_y_long);
@@ -292,15 +326,15 @@ export function draw_scales_rdmap() {
 
 // adjust colorbar according to current window dimensions
 export function adjust_colorbar() {
-  var id_elements = ["#colorbar_blue", "#colorbar_cyan2blue", "#colorbar_green2cyan", "#colorbar_yellow2green", "#colorbar_red2yellow", "#colorbar_red"];
-  var id_slider = "#colorbar_slider"
+  let id_elements = ["#colorbar_blue", "#colorbar_cyan2blue", "#colorbar_green2cyan", "#colorbar_yellow2green", "#colorbar_red2yellow", "#colorbar_red"];
+  let id_slider = "#colorbar_slider"
 
   // read values from slider, sort values and write them back to slider
-  var values = $(id_slider).slider("option", "values").sort(function(a,b){return a-b});
+  let values = $(id_slider).slider("option", "values").sort(function(a,b) { return a - b });
   $(id_slider).slider({"values": values});
 
   // adjust heights of colorbar ranges according to slider values
-  for (i = 0; i <= values.length; i++) {
+  for (let i = 0; i <= values.length; i++) {
     if (i == 0) {
       $(id_elements[i]).css("height", String(values[i] * 100/255)+"%");
     } else if (i == values.length) {
@@ -312,38 +346,38 @@ export function adjust_colorbar() {
 
   // RGBA table, maps uint8 values to RGBA values
   // RGBA values are stored as ABGR
-  var cb_blue_level = parseInt(values[0]);
-  var cb_cyan_level = parseInt(values[1]);
-  var cb_green_level = parseInt(values[2]);
-  var cb_yellow_level = parseInt(values[3]);
-  var cb_red_level = parseInt(values[4]);
+  let cb_blue_level = parseInt(values[0]);
+  let cb_cyan_level = parseInt(values[1]);
+  let cb_green_level = parseInt(values[2]);
+  let cb_yellow_level = parseInt(values[3]);
+  let cb_red_level = parseInt(values[4]);
 
 
-  rgbatable = new Uint32Array(256);
-  for (i = 0;i <= cb_blue_level;i++) {
+  let rgbatable = new Uint32Array(256);
+  for (let i = 0;i <= cb_blue_level;i++) {
     rgbatable[i] = 0xFFFF0000;
   }
-  for (i = cb_blue_level;i <= cb_cyan_level;i++) {
+  for (let i = cb_blue_level;i <= cb_cyan_level;i++) {
     rgbatable[i] = 0xFFFF0000 + ((255*(i-cb_blue_level)/(cb_cyan_level-cb_blue_level)) << 8);
   }
-  for (i = cb_cyan_level;i <= cb_green_level;i++) {
+  for (let i = cb_cyan_level;i <= cb_green_level;i++) {
     rgbatable[i] = 0xFFFFFF00 - ((255*(i-cb_cyan_level)/(cb_green_level-cb_cyan_level)) << 16);
   }
-  for (i = cb_green_level;i <= cb_yellow_level;i++) {
+  for (let i = cb_green_level;i <= cb_yellow_level;i++) {
     rgbatable[i] = 0xFF00FF00 + (255*(i-cb_green_level)/(cb_yellow_level-cb_green_level));
   }
-  for (i = cb_yellow_level;i <= cb_red_level;i++) {
+  for (let i = cb_yellow_level;i <= cb_red_level;i++) {
     rgbatable[i] = 0xFF00FFFF - ((255*(i-cb_yellow_level)/(cb_red_level-cb_yellow_level)) << 8);
   }
-  for (i = cb_red_level;i <= 255;i++) {
+  for (let i = cb_red_level;i <= 255;i++) {
     rgbatable[i] = 0xFF0000FF;
   }
 
   // scaled RGBA table, maps Uint8 radar data to colormap
   scaled_rgbatable = new Uint32Array(256);
 
-  var scale = 255/(COLORBAR_SCALE_MAX-COLORBAR_SCALE_MIN);
-  var offset = -COLORBAR_SCALE_MIN;
+  let scale = 255/(COLORBAR_SCALE_MAX - COLORBAR_SCALE_MIN);
+  let offset = -COLORBAR_SCALE_MIN;
 
   // // mapping for signed input data
   // for (i = 0;i < 256;i++) {
@@ -362,7 +396,7 @@ export function adjust_colorbar() {
   // }
 
   // mapping for unsigned input data
-  for (i = 0;i < 256;i++) {
+  for (let i = 0;i < 256;i++) {
     if (i < COLORBAR_SCALE_MIN) {
       scaled_rgbatable[i] = 0xFF800000;
     } else if (i > COLORBAR_SCALE_MAX) {
@@ -390,20 +424,20 @@ export function adjust_graphics () {
   $("#colorbar_scale_canvas").attr("width", "auto");
 
   // read current widths inside graphics box
-  var graphics_width = parseInt($("#grid_graphics").css("width"));
-  var spacer_width = parseInt($("#grid_graphics_spacer").css("width"));
-  var colorbar_slider_width = parseInt($("#grid_graphics_colorbar_slider").css("width"));
-  var colorbar_width = parseInt($("#grid_graphics_colorbar").css("width"));
+  let graphics_width = parseInt($("#grid_graphics").css("width"));
+  let spacer_width = parseInt($("#grid_graphics_spacer").css("width"));
+  let colorbar_slider_width = parseInt($("#grid_graphics_colorbar_slider").css("width"));
+  let colorbar_width = parseInt($("#grid_graphics_colorbar").css("width"));
 
   // colorbar scale
-  var colorbar_scale_width = Math.max(getWidthOfText(COLORBAR_SCALE_MIN.toFixed(COLORBAR_SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE), getWidthOfText(COLORBAR_SCALE_MAX.toFixed(COLORBAR_SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE)) + SCALE_TICKLENGTH + SCALE_TICK2TEXT_DISTANCE;
+  let colorbar_scale_width = Math.max(getWidthOfText(COLORBAR_SCALE_MIN.toFixed(COLORBAR_SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE), getWidthOfText(COLORBAR_SCALE_MAX.toFixed(COLORBAR_SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE)) + SCALE_TICKLENGTH + SCALE_TICK2TEXT_DISTANCE;
   $("#grid_graphics_colorbar_scale").css("width", colorbar_scale_width + "px");
   $("#colorbar_scale_canvas").css("width", colorbar_scale_width + "px");
   $("#colorbar_scale_canvas").attr("width", colorbar_scale_width);
 
   // image
-  var max_scale_y_value_size = Math.round(Math.max(getWidthOfText(scale_world_start_y.toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE), getWidthOfText((scale_world_start_y + scale_world_range_y).toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE)));
-  var image_scale_width = graphics_width - (spacer_width + colorbar_slider_width + colorbar_width + colorbar_scale_width);
+  let max_scale_y_value_size = Math.round(Math.max(getWidthOfText(scale_world_start_y.toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE), getWidthOfText((scale_world_start_y + scale_world_range_y).toFixed(SCALE_DECIMAL_PLACES).toString(), SCALE_FONT, SCALE_FONTSIZE)));
+  let image_scale_width = graphics_width - (spacer_width + colorbar_slider_width + colorbar_width + colorbar_scale_width);
   image_data_offset_x = SCALE_TICKLENGTH + max_scale_y_value_size + SCALE_TICK2TEXT_DISTANCE + 2 * SCALE_FONTSIZE;
   image_data_size_x = image_scale_width - image_data_offset_x - SCALE_FONTSIZE;
   $("#grid_graphics_image").css("width", image_scale_width + "px");
@@ -417,7 +451,7 @@ export function adjust_graphics () {
   // adjust heights
 
   // read current height of frames
-  var graphics_height = parseInt($("#grid_graphics_container.box").css("height"), 10);
+  let graphics_height = parseInt($("#grid_graphics_container.box").css("height"), 10);
 
   image_data_offset_y = SCALE_FONTSIZE/2;
   image_data_size_y = graphics_height - (image_data_offset_y + SCALE_TICKLENGTH + SCALE_TICK2TEXT_DISTANCE + 3*SCALE_FONTSIZE);
@@ -473,7 +507,7 @@ export function process_graphics_data(data_buffer) {
   }
 
   // do nothing if node index of data received is not included in the list of node indices to be displayed
-  var node_index = arraybuffer2type_header(data_buffer.slice(0, TYPE_HEADER_SIZE_BYTES)).value;
+  let node_index = arraybuffer2type_header(data_buffer.slice(0, TYPE_HEADER_SIZE_BYTES)).value;
   if (!display_node_index_list.includes(node_index)) return;
 
   // check incoming datatype
@@ -482,31 +516,36 @@ export function process_graphics_data(data_buffer) {
     return;
   }
 
+
+  let data;
+  let rgba_buf32;
+  let rgba_buf8;
+
   // map received data to RGBA values
   // use the highest byte only
   switch (nodes_headers[node_index].bitwidth) {
     case 8:
-      var data = new Uint8Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
-      var rgba_buf32 = Uint32Array.from(data).map(e => scaled_rgbatable[e]);
+      data = new Uint8Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
+      rgba_buf32 = Uint32Array.from(data).map(e => scaled_rgbatable[e]);
       break;
     case 16:
-      var data = new Uint16Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
-      var rgba_buf32 = Uint32Array.from(data).map(e => scaled_rgbatable[e >> 8]);
+      data = new Uint16Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
+      rgba_buf32 = Uint32Array.from(data).map(e => scaled_rgbatable[e >> 8]);
       break;
     case 32:
-      var data = new Uint32Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
-      var rgba_buf32 = data.map(e => scaled_rgbatable[e >> 24]);
+      data = new Uint32Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
+      rgba_buf32 = data.map(e => scaled_rgbatable[e >> 24]);
       break;
     default:
       alert("ERROR: Wrong bitwidth (" + nodes_headers[node_index].data_bitwidth + ") received");
       return;
   }
-  var rgba_buf8 = new Uint8Array(rgba_buf32.buffer);
+
+  rgba_buf8 = new Uint8Array(rgba_buf32.buffer);
 
   // copy RGBA data to canvas
-  var display_mode_received = display_mode_list[display_node_index_list.findIndex(e => e == node_index)];
+  let display_mode_received = display_mode_list[display_node_index_list.findIndex(e => e == node_index)];
   switch (display_mode_received) {
-// 		console.log("ws receive: Data | " + data_buffer.byteLength + " bytes (including header) | node index = " + node_index);
     case 'R/D Map':
       imgdata_rdmap.data.set(rgba_buf8);
       image_rdmap_canvas_ctx.putImageData(imgdata_rdmap, 0, 0, data_image_start_x, data_image_start_y, data_image_range_x, data_image_range_y);
@@ -514,7 +553,7 @@ export function process_graphics_data(data_buffer) {
     case 'CFAR':
       imgdata_cfar.data.set(rgba_buf8);
       image_cfar_canvas_ctx.putImageData(imgdata_cfar, 0, 0, data_image_start_x, data_image_start_y, data_image_range_x, data_image_range_y);
-      var rgba_buf8  = new Uint8Array(rgba_buf32.map(x => x != CFAR_NO_TARGET_COLOR ? CFAR_HIGHLIGHT_COLOR : CFAR_TRANSPARENT_COLOR).buffer);
+      rgba_buf8 = new Uint8Array(rgba_buf32.map(x => x != CFAR_NO_TARGET_COLOR ? CFAR_HIGHLIGHT_COLOR : CFAR_TRANSPARENT_COLOR).buffer);
       imgdata_cfar_highlight.data.set(rgba_buf8);
       image_cfar_highlight_canvas_ctx.putImageData(imgdata_cfar_highlight, 0, 0, data_image_start_x, data_image_start_y, data_image_range_x, data_image_range_y);
       break;
@@ -529,9 +568,7 @@ export function process_graphics_data(data_buffer) {
 
 // redraw canvas overlays
 export function update_canvas_overlays() {
-
   if(status_iscomplete(graphics_states)) {
-
     switch (display_mode) {
       case 'R/D Map':
         $("#image_rdmap_canvas").css("z-index", "3");
@@ -557,7 +594,6 @@ export function update_canvas_overlays() {
 
 // redraw graphics according to current window dimemsions and scale settings
 export function update_graphics() {
-
   if(status_iscomplete(graphics_states)) {
     draw_scales_rdmap();
 
@@ -583,7 +619,6 @@ export function update_graphics() {
 
 // initialize graphics settings
 export function init_graphics() {
-
   status_clearall(graphics_states);
 
   nodes_names = [];
@@ -635,3 +670,7 @@ export function init_graphics() {
   image_cfar_highlight_canvas_ctx = image_cfar_highlight_canvas.getContext('2d');
   imgdata_cfar_highlight_canvas = document.createElement('canvas');
 }
+
+
+
+

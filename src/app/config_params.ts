@@ -25,6 +25,7 @@ export const cfg_parameter_value_struct = struct(
 export var cfg_parameter_value = [];
 export var	cfg_parameter_count = 0;
 
+export function set_cfg_parameter_count(num) { cfg_parameter_count = num }
 
 export  function check_parameter(parameter) {
   var i = cfg_parameter_value.findIndex(element => "parameter_input_" + element.name == parameter.id);
