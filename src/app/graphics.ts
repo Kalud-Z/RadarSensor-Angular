@@ -4,11 +4,23 @@
 
 
 // graphics state
-import { states_struct, status_clearall, status_iscomplete } from './basics';
-import { cfg_parameters_states, init_parameters } from './config_params';
-import { controls_states, display_mode, display_mode_list, display_node_index_list, init_controls } from './controls';
-import { request_initial_config } from './commands';
-import { arraybuffer2type_header, TYPE_HEADER_SIZE_BYTES } from './headers';
+
+// @ts-nocheck
+import { states_struct, status_clearall, status_iscomplete } from './basics.js';
+import { cfg_parameters_states, init_parameters } from './config_params.js';
+import { controls_states, display_mode, display_mode_list, display_node_index_list, init_controls } from './controls.js';
+import { request_initial_config } from './commands.js';
+import { arraybuffer2type_header, TYPE_HEADER_SIZE_BYTES } from './headers.js';
+
+declare var $: any;
+// import * as $ from 'jqueryui';
+
+
+
+// import $ from "jquery";
+// import * as $ from "jquery";
+
+
 
 export const graphics_states = [
   states_struct('GRAPHICS_STATE_NODES_NAMES',		0),
@@ -60,14 +72,14 @@ export let CFAR_TRANSPARENT_COLOR = 0x00000000;
 
 
 // incoming data type/size/start/range
-export let data_datatype;
-export let data_bitwidth;
-export let data_image_size_x;
-export let data_image_size_y;
-export let data_image_start_x;
-export let data_image_start_y;
-export let data_image_range_x;
-export let data_image_range_y;
+export let data_datatype;       export function set_data_datatype(k) { data_datatype = k }
+export let data_bitwidth;       export function set_data_bitwidth(k) { data_bitwidth = k }
+export let data_image_size_x;   export function set_data_image_size_x(k) { data_image_size_x = k }
+export let data_image_size_y;   export function set_data_image_size_y(k) { data_image_size_y = k }
+export let data_image_start_x;  export function set_data_image_start_x(k) { data_image_start_x = k }
+export let data_image_start_y;  export function set_data_image_start_y(k) { data_image_start_y = k }
+export let data_image_range_x;  export function set_data_image_range_x(k) { data_image_range_x = k }
+export let data_image_range_y;  export function set_data_image_range_y(k) { data_image_range_y = k }
 
 // image position / size
 export let image_data_offset_x;
@@ -76,16 +88,16 @@ export let image_data_offset_y;
 export let image_data_size_y;
 
 // scales
-export let scale_legend_x;
-export let scale_legend_y;
-export let scale_world_start_x;
-export let scale_world_start_y;
-export let scale_world_range_x;
-export let scale_world_range_y;
+export let scale_legend_x;      export function set_scale_legend_x(k) { scale_legend_x = k }
+export let scale_legend_y;      export function set_scale_legend_y(k) { scale_legend_x = k }
+export let scale_world_start_x; export function set_scale_world_start_x(k) { scale_world_start_x = k }
+export let scale_world_start_y; export function set_scale_world_start_y(k) { scale_world_start_y = k }
+export let scale_world_range_x; export function set_scale_world_range_x(k) { scale_world_range_x = k }
+export let scale_world_range_y; export function set_scale_world_range_y(k) { scale_world_range_y = k }
 
 // resolution / bin
-export let res_x;
-export let res_y;
+export let res_x; export function set_res_x(k) { res_x = k }
+export let res_y; export function set_res_y(k) { res_y = k }
 
 // canvas data
 export let image_scale_canvas;

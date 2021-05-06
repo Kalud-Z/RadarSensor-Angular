@@ -1,1 +1,40 @@
 /* You can add global styles to this file, and also import other style files */
+
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+html {
+  color: #4c4747;
+  font-family: 'Roboto Mono', monospace;
+  //font-size: 62.5%;  /* this is the root font-size ! | and = 62.5% of the default browser font-size which is usually 16px ==> final value 10px */
+  font-size: 58.5%;  /* this is the root font-size ! | and = 62.5% of the default browser font-size which is usually 16px ==> final value 10px */
+}
+
+
+
+body {
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

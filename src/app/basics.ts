@@ -2,11 +2,10 @@
 // basic objects and functions
 ///////////////////////////////////////
 
-/**
- * alot of functions and couple of vars being used in this file and outside as well
- *
- */
 
+// @ts-nocheck
+
+declare var $: any;
 
 // constructor for structs
 export const struct = (...keys) => ((...v) => keys.reduce((o, k, i) => {o[k] = v[i]; return o} , {})) ; //it is used outside
@@ -60,15 +59,17 @@ export function status_iscomplete(status_array) {
 
 
 
-
 // websockets handling
 // ws state
 export const ws_states = { 'WS_STATE_DISCONNECTED': 0, 'WS_STATE_CONNECTED': 1 }; //it is used outside
 Object.freeze(ws_states);
+
 export let ws_state = ws_states.WS_STATE_DISCONNECTED; //it is used outside
+export function set_ws_state(k) { ws_state = k }
 
 // ws object
-export let ws;  //it is used outside
+export let  ws;  //it is used outside
+export function set_ws(k) { ws = k }
 
 // return appropriate websockets URL
 // export function get_appropriate_ws_url(extra_url) //use this function when frontend code is hosted on the board.

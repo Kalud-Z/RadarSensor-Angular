@@ -2,20 +2,46 @@
 // headers, see buffers.h for details
 ///////////////////////////////////////
 
-import { arraybuffer2string, status_iscomplete, status_isset, status_set, struct } from './basics';
-import { cfg_parameters_states, init_parameters } from './config_params';
-import { controls_states, init_controls, node_index_required } from './controls';
-import { rc_cmds, request_initial_config, send_cmd } from './commands';
+
+// @ts-nocheck
+import { arraybuffer2string, status_iscomplete, status_isset, status_set, struct } from './basics.js';
+import { cfg_parameters_states, init_parameters } from './config_params.js';
+import { controls_states, init_controls, node_index_required } from './controls.js';
+import { rc_cmds, request_initial_config, send_cmd } from './commands.js';
 import {
   data_bitwidth,
-  data_datatype, data_image_range_x, data_image_range_y,
-  data_image_size_x, data_image_size_y, data_image_start_x, data_image_start_y,
+  data_datatype,
+  data_image_range_x,
+  data_image_range_y,
+  data_image_size_x,
+  data_image_size_y,
+  data_image_start_x,
+  data_image_start_y,
   graphics_states,
-  init_graphics, res_x, res_y,
+  init_graphics,
+  res_x,
+  res_y,
   scale_legend_x,
-  scale_legend_y, scale_world_range_x, scale_world_range_y, scale_world_start_x, scale_world_start_y, update_graphics,
-} from './graphics';
+  scale_legend_y,
+  scale_world_range_x,
+  scale_world_range_y,
+  scale_world_start_x,
+  scale_world_start_y,
+  set_data_bitwidth,
+  set_data_datatype, set_data_image_range_x, set_data_image_range_y,
+  set_data_image_size_x,
+  set_data_image_size_y, set_data_image_start_x,
+  set_data_image_start_y, set_res_x, set_res_y,
+  set_scale_legend_x,
+  set_scale_legend_y,
+  set_scale_world_range_x,
+  set_scale_world_range_y,
+  set_scale_world_start_x,
+  set_scale_world_start_y,
+  update_graphics,
+} from './graphics.js';
 
+declare var $: any;
 
 
 // header tags
@@ -102,7 +128,7 @@ export function arraybuffer2node_header(arraybuffer, node_index) {
     arraybuffer2string(arraybuffer.slice(offset_labels, offset_labels + NODE_LABEL_SIZE_BYTES)),
     arraybuffer2string(arraybuffer.slice(offset_labels + NODE_LABEL_SIZE_BYTES, offset_labels + 2 * NODE_LABEL_SIZE_BYTES)),
     arraybuffer2string(arraybuffer.slice(offset_datatype, offset_datatype + 1)),
-    dv.getUint8(offset_bitwidth, true),
+    dv.getUint8(offset_bitwidth),
     dv.getUint16(offset_image, true),
     dv.getUint16(offset_image + 2, true),
     dv.getUint16(offset_image + 4, true),
@@ -150,22 +176,22 @@ export function process_pipeline_headers(data_buffer) {
 
   // no nodes to be displayed -> setup graphics with default values
   if (node_index_required < 0) {
-    scale_legend_x = 'range';
-    scale_legend_y = 'velocity';
-    data_datatype = 'U';
-    data_bitwidth = 8;
-    data_image_size_x = 1;
-    data_image_size_y = 1;
-    data_image_start_x = 0;
-    data_image_start_y = 0;
-    data_image_range_x = 0;
-    data_image_range_y = 0;
-    scale_world_start_x = 0;
-    scale_world_start_y = 0;
-    scale_world_range_x = 0;
-    scale_world_range_y = 0;
-    res_x = 0;
-    res_y = 0;
+    set_scale_legend_x('range');
+    set_scale_legend_y('velocity');
+    set_data_datatype('U');
+    set_data_bitwidth(8);
+    set_data_image_size_x(1);
+    set_data_image_size_y(1);
+    set_data_image_start_x(0);
+    set_data_image_start_y(0);
+    set_data_image_range_x(0);
+    set_data_image_range_y(0);
+    set_scale_world_start_x(0);
+    set_scale_world_start_y(0);
+    set_scale_world_range_x(0);
+    set_scale_world_range_y(0);
+    set_res_x(0);
+    set_res_y(0);
     status_set(graphics_states, 'GRAPHICS_STATE_SCALES');
     update_graphics();
     return;
@@ -189,22 +215,22 @@ export function process_pipeline_headers(data_buffer) {
     (scale_world_range_y != nodes_headers[node_index_required].world_range_y)
   );
   if (scale_parameters_changed) {
-    scale_legend_x = nodes_headers[node_index_required].label_x;
-    scale_legend_y = nodes_headers[node_index_required].label_y;
-    data_datatype = nodes_headers[node_index_required].datatype;
-    data_bitwidth = nodes_headers[node_index_required].bitwidth;
-    data_image_size_x = nodes_headers[node_index_required].image_size_x;
-    data_image_size_y = nodes_headers[node_index_required].image_size_y;
-    data_image_start_x = nodes_headers[node_index_required].image_start_x;
-    data_image_start_y = nodes_headers[node_index_required].image_start_y;
-    data_image_range_x = nodes_headers[node_index_required].image_range_x;
-    data_image_range_y = nodes_headers[node_index_required].image_range_y;
-    scale_world_start_x = nodes_headers[node_index_required].world_start_x;
-    scale_world_start_y = nodes_headers[node_index_required].world_start_y;
-    scale_world_range_x = nodes_headers[node_index_required].world_range_x;
-    scale_world_range_y = nodes_headers[node_index_required].world_range_y;
-    res_x = scale_world_range_x / (data_image_range_x - 1);
-    res_y = scale_world_range_y / (data_image_range_y - 1);
+    set_scale_legend_x(nodes_headers[node_index_required].label_x);
+    set_scale_legend_y(nodes_headers[node_index_required].label_y);
+    set_data_datatype(nodes_headers[node_index_required].datatype);
+    set_data_bitwidth(nodes_headers[node_index_required].bitwidth);
+    set_data_image_size_x(nodes_headers[node_index_required].image_size_x);
+    set_data_image_size_y(nodes_headers[node_index_required].image_size_y);
+    set_data_image_start_x(nodes_headers[node_index_required].image_start_x);
+    set_data_image_start_y(nodes_headers[node_index_required].image_start_y);
+    set_data_image_range_x(nodes_headers[node_index_required].image_range_x);
+    set_data_image_range_y(nodes_headers[node_index_required].image_range_y);
+    set_scale_world_start_x(nodes_headers[node_index_required].world_start_x);
+    set_scale_world_start_y(nodes_headers[node_index_required].world_start_y);
+    set_scale_world_range_x(nodes_headers[node_index_required].world_range_x);
+    set_scale_world_range_y(nodes_headers[node_index_required].world_range_y);
+    set_res_x(scale_world_range_x / (data_image_range_x - 1));
+    set_res_y(scale_world_range_y / (data_image_range_y - 1));
     status_set(graphics_states, 'GRAPHICS_STATE_SCALES');
     update_graphics();
   }

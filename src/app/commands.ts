@@ -3,8 +3,10 @@
 ///////////////////////////////////////
 
 // rc cmds
-import { arraybuffer2string, status_clear, status_set, struct, ws, ws_state, ws_states } from './basics';
-import { TYPE_HEADER_SIZE_BYTES } from './headers';
+
+// @ts-nocheck
+import { arraybuffer2string, status_clear, status_set, struct, ws, ws_state, ws_states } from './basics.js';
+import { TYPE_HEADER_SIZE_BYTES } from './headers.js';
 import {
   cfg_parameter_count, cfg_parameter_value, cfg_parameter_value_struct,
   cfg_parameters_states,
@@ -12,7 +14,7 @@ import {
   RE_TOKEN_DELIMS, set_cfg_parameter_count,
   TOKEN_DELIMITER,
   update_parameters,
-} from './config_params';
+} from './config_params.js';
 import {
   clear_data_invalid_marker,
   graphics_states,
@@ -22,18 +24,37 @@ import {
   set_nodes_names,
   set_nodes_omodes,
   update_graphics,
-} from './graphics';
+} from './graphics.js';
 import {
   cfg_file_current,
   cfg_file_list,
-  controls_states, ctl_nruns, display_mode_info, display_mode_list, display_node_index_list, init_controls, rc_states,
+  controls_states,
+  ctl_nruns,
+  display_mode_info,
+  display_mode_list,
+  display_node_index_list,
+  init_controls,
+  rc_states,
   set_cfg_file_current,
-  set_cfg_file_list, set_rc_state, trigger_id,
-  update_cfg_file_list, update_controls, update_display_mode_list, update_trigger,
-} from './controls';
+  set_cfg_file_list,
+  set_ctl_nruns,
+  set_display_mode_list,
+  set_display_node_index_list,
+  set_rc_state,
+  set_trigger_id,
+  trigger_id,
+  update_cfg_file_list,
+  update_controls,
+  update_display_mode_list,
+  update_trigger,
+} from './controls.js';
+
+declare var $: any;
+
 
 export const rc_cmds = {
-  'CMD_RC_CFG_UNKNOWN':	  0,
+  'CMD_RC_CFG_UNKNOWN':	  -1,
+  'CMD_RC_UNKNOWN':	  0,
   'CMD_RC_RUN_GO':			  1,
   'CMD_RC_RUN_TRIGGER':	  2,
   'CMD_RC_RUN_HALT':		  3,
@@ -87,41 +108,43 @@ export const cmds = [
 ];
 
 
-export var rc_cmd_sent = -1;
+export let rc_cmd_sent = -1; export function set_rc_cmd_sent(k) { rc_cmd_sent = k }
 
 
 export function cmd_short2rc_cmd (cmd_short) {
-  var rc_cmd = rc_cmds.CMD_RC_UNKNOWN;
+  let rc_cmd = rc_cmds.CMD_RC_UNKNOWN;
   cmds.forEach(key => (key.cmd_short == cmd_short) && (rc_cmd = key.rc_cmd))
   return rc_cmd;
 }
 
 
 export function cmd_long2rc_cmd (cmd_long) {
-  var rc_cmd = rc_cmds.CMD_RC_UNKNOWN;
+  let rc_cmd = rc_cmds.CMD_RC_UNKNOWN;
   cmds.forEach(key => (key.cmd_long == cmd_long) && (rc_cmd = key.rc_cmd))
   return rc_cmd;
 }
 
 
 export function rc_cmd2cmd_short(rc_cmd) {
-  var cmd_short = 'xx';
+  let cmd_short = 'xx';
   cmds.forEach(key => (key.rc_cmd == rc_cmd) && (cmd_short = key.cmd_short))
   return cmd_short;
 }
 
 
 export function send_cmd(rc_cmd, ...args) {
-  var sendstring = rc_cmd2cmd_short(rc_cmd) + TOKEN_DELIMITER + [...args].join(TOKEN_DELIMITER) + "\n";
+  let sendstring = rc_cmd2cmd_short(rc_cmd) + TOKEN_DELIMITER + [...args].join(TOKEN_DELIMITER) + "\n";
   if (ws_state == ws_states.WS_STATE_CONNECTED) {
     // no unresponded cmds before sending a new one
     if (rc_cmd_sent == -1) {
       ws.send(sendstring);
       if (cmds[rc_cmd].response_needed) rc_cmd_sent = rc_cmd;
-    } else {
+    }
+    else {
       console.log("WARNING: Can't send command " + sendstring + ". Still waiting for response to command " + rc_cmd2cmd_short(rc_cmd_sent));
     }
-  } else {
+  }
+  else {
     console.log("ws send: Not connected - can't send \"" + sendstring + "\"");
   }
 }
@@ -144,13 +167,13 @@ export function request_initial_config() {
 
 export function process_cmd (data_buffer) {
   // convert command string into array of strings
-  var cmd_array = arraybuffer2string(data_buffer.slice(TYPE_HEADER_SIZE_BYTES)).split(RE_TOKEN_DELIMS);
+  let cmd_array = arraybuffer2string(data_buffer.slice(TYPE_HEADER_SIZE_BYTES)).split(RE_TOKEN_DELIMS);
 
   // remove empty last element if present
   if (cmd_array[cmd_array.length - 1] == "") cmd_array = cmd_array.slice(0, cmd_array.length - 1)
 
   // do we know this command?
-  var rc_cmd = cmd_short2rc_cmd(cmd_array[0]);
+  let rc_cmd = cmd_short2rc_cmd(cmd_array[0]);
   if (rc_cmd == rc_cmds.CMD_RC_UNKNOWN)
     rc_cmd = cmd_long2rc_cmd(cmd_array[0]);
   if (rc_cmd == rc_cmds.CMD_RC_CFG_UNKNOWN) {
@@ -158,24 +181,21 @@ export function process_cmd (data_buffer) {
     return;
   }
 
-  // console.log("ws receive: Command | " + cmd_array);
-
   // did we receive a response to a command we sent before?
   if (rc_cmd == rc_cmd_sent) rc_cmd_sent = -1;
+
+  let cfg_file:any ;
 
   // process commands
   switch (rc_cmd) {
     case rc_cmds.CMD_RC_DATA_INVALID:
       set_data_invalid_marker();
       break;
+
     case rc_cmds.CMD_RC_CFG_COUNT:
-      var count = parseInt(cmd_array[1]);
-
-      // count must be an integer value
-      if (isNaN(count)) return;
-
-      // did the number of cfg parameters change unexpectedly?
-      if ((cfg_parameter_count != 0) && (count != cfg_parameter_count)) {
+      let count = parseInt(cmd_array[1]);
+      if (isNaN(count)) return; // count must be an integer value
+      if ((cfg_parameter_count != 0) && (count != cfg_parameter_count)) { // did the number of cfg parameters change unexpectedly?
         // reset cfg_parameters values, request new set of cfg parameters
         console.log("WARNING: Number of cfg parameters has changed");
         init_parameters();
@@ -191,11 +211,11 @@ export function process_cmd (data_buffer) {
       break;
 
     case rc_cmds.CMD_RC_CFG_VALUE:
-      var name = cmd_array[1];
-      var value = cmd_array[2];
-      var text = cmd_array[3];
-      var type = cmd_array[4];
-      var allowed_values = cmd_array.slice(5).join(TOKEN_DELIMITER);
+      let name = cmd_array[1];
+      let value = cmd_array[2];
+      let text = cmd_array[3];
+      let type = cmd_array[4];
+      let allowed_values = cmd_array.slice(5).join(TOKEN_DELIMITER);
 
       // did we receive all command arguments?
       if (cmd_array.length < 6) return;
@@ -212,8 +232,8 @@ export function process_cmd (data_buffer) {
       }
 
       // do we already know a cfg parameter with the same name?
-      var index = cfg_parameter_value.findIndex(element => element.name == name);
-      var cfg_parameter_value_new = cfg_parameter_value_struct(name, value, text, type, allowed_values);
+      let index = cfg_parameter_value.findIndex(element => element.name == name);
+      let cfg_parameter_value_new = cfg_parameter_value_struct(name, value, text, type, allowed_values);
       if (index >= 0) {
         // yes: overwrite existing cfg parameter
         cfg_parameter_value[index] = cfg_parameter_value_new;
@@ -232,7 +252,7 @@ export function process_cmd (data_buffer) {
       break;
 
     case rc_cmds.CMD_RC_CFG_FILES:
-      var files = cmd_array.splice(1).sort();
+      let files = cmd_array.splice(1).sort();
       // cfg_file_list = files;
       set_cfg_file_list(files)
 
@@ -246,7 +266,7 @@ export function process_cmd (data_buffer) {
       break;
 
     case rc_cmds.CMD_RC_CFG_LOAD:
-      var cfg_file = cmd_array.splice(1, 1);
+      cfg_file = cmd_array.splice(1, 1);
       if (cfg_file.length == 0) { alert("ERROR: Could not load configuration file")}
       // cfg_file_current = cfg_file;
       set_cfg_file_current(cfg_file)
@@ -254,7 +274,7 @@ export function process_cmd (data_buffer) {
       break;
 
     case rc_cmds.CMD_RC_CFG_SAVE:
-      var cfg_file = cmd_array.splice(1, 1);
+      cfg_file = cmd_array.splice(1, 1);
       if (cfg_file.length == 0) { alert("ERROR: Could not save configuration file") }
       else {
         // cfg_file_current = cfg_file;
@@ -265,7 +285,7 @@ export function process_cmd (data_buffer) {
       break;
 
     case rc_cmds.CMD_RC_NODES_NAMES:
-      var nodes_names_old = nodes_names;
+      let nodes_names_old = nodes_names;
       // nodes_names = cmd_array.splice(1);
       set_nodes_names(cmd_array.splice(1))
 
@@ -279,7 +299,7 @@ export function process_cmd (data_buffer) {
       break;
 
     case rc_cmds.CMD_RC_NODES_OMODES:
-      var nodes_omodes_old = nodes_omodes.slice(0);
+      let nodes_omodes_old = nodes_omodes.slice(0);
       // nodes_omodes = cmd_array.splice(1);
       set_nodes_omodes(cmd_array.splice(1));
 
@@ -301,8 +321,11 @@ export function process_cmd (data_buffer) {
         }
 
         // generate display mode list from nodes names and nodes output modes
-        display_mode_list = [];  //TODO : it is though a VAR in some other file. is this gonna cause also a run-time error ?
-        display_node_index_list = [];
+        // display_mode_list = [];  //TODO : it is though a VAR in some other file. is this gonna cause also a run-time error ?
+        set_display_mode_list([]);
+
+        // display_node_index_list = [];
+        set_display_node_index_list([]);
 
         for (let i in display_mode_info) {
           // if display mode in nodes names
@@ -343,8 +366,14 @@ export function process_cmd (data_buffer) {
     case rc_cmds.CMD_RC_RUN_GO:
       // rc_state = rc_states.RC_STATE_GO;
       set_rc_state(rc_states.RC_STATE_GO)
-      ctl_nruns = parseInt(cmd_array[1], 10); //TODO : not sure about this one.
-      trigger_id = parseInt(cmd_array[2], 10);
+
+      // ctl_nruns = parseInt(cmd_array[1], 10); //TODO : not sure about this one.
+      set_ctl_nruns(parseInt(cmd_array[1], 10));
+
+      // trigger_id = parseInt(cmd_array[2], 10);
+      set_trigger_id(parseInt(cmd_array[2], 10));
+
+
       status_set(controls_states, 'CONTROLS_STATE_STATUS');
       clear_data_invalid_marker();
       update_trigger();
@@ -356,7 +385,7 @@ export function process_cmd (data_buffer) {
       // rc_state = rc_states.RC_STATE_QUIT;
       set_rc_state(rc_states.RC_STATE_QUIT)
 
-      let quit_return_value = cmd_array.splice(1, 1); // TODO: in legacy_code this var was not declared before. still the code worked !
+      let quit_return_value = cmd_array.splice(1, 1); // TODO: in legacy_code this let was not declared before. still the code worked !
       if (quit_return_value.length == 0) {
         quit_return_value[0] = '0';
       }
@@ -372,7 +401,6 @@ export function process_cmd (data_buffer) {
       break;
   }
 
-
-}
+} //process_cmd()
 
 
