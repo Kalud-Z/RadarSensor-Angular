@@ -19,24 +19,24 @@ declare var $: any;
 export const trigger_id_timeout = 0;
 export const trigger_id_internal = 1;
 export const trigger_id_external_hw = 2;
-export let trigger_id;  export function set_trigger_id(k) { trigger_id = k }
+// export let trigger_id;  export function set_trigger_id(k) { trigger_id = k }
 
 // rc state
-export const rc_states = {
-  'RC_STATE_UNDEFINED': 0,
-  'RC_STATE_HALT':      1,
-  'RC_STATE_GO':        2,
-  'RC_STATE_QUIT':      3
-};
-Object.freeze(rc_states);
+// export const rc_states = {
+//   'RC_STATE_UNDEFINED': 0,
+//   'RC_STATE_HALT':      1,
+//   'RC_STATE_GO':        2,
+//   'RC_STATE_QUIT':      3
+// };
+// Object.freeze(rc_states);
 
 export let rc_state;
 export function set_rc_state(state) {  rc_state = state }
 
-export const controls_states = [
-  states_struct('CONTROLS_STATE_CFG_FILES',	0),
-  states_struct('CONTROLS_STATE_STATUS',		0)
-];
+// export const controls_states = [
+//   states_struct('CONTROLS_STATE_CFG_FILES',	0),
+//   states_struct('CONTROLS_STATE_STATUS',		0)
+// ];
 
 
 // default number of runs
@@ -44,33 +44,31 @@ export let ctl_nruns_default = 0;
 
 
 // cfg file list
-export let cfg_file_current; export function set_cfg_file_current(file) { cfg_file_current = file }
-
-
-export let cfg_file_list;
-export function set_cfg_file_list(list) { cfg_file_list = list }
+// export let cfg_file_current; export function set_cfg_file_current(file) { cfg_file_current = file }
+// export let cfg_file_list; export function set_cfg_file_list(list) { cfg_file_list = list }
 
 // display modes
-export const display_mode_info_struct = struct(
-  'mode',
-  'node_name_required',
-  'match_to_pipeline'
-);
+// export const display_mode_info_struct = struct(
+//   'mode',
+//   'node_name_required',
+//   'match_to_pipeline'
+// );
 
 // set required node names for display modes
+
 // and matches between pipeline names and display modes
-export let display_mode_info = [
-  display_mode_info_struct('R/D Map',	'FFT2ABSLOG', 'RDMAP'),
-  display_mode_info_struct('CFAR',	'CFAR'		, 'CFAR')
-];
+// export let display_mode_info = [
+//   display_mode_info_struct('R/D Map',	'FFT2ABSLOG', 'RDMAP'),
+//   display_mode_info_struct('CFAR',	'CFAR'		, 'CFAR')
+// ];
 
 export let display_mode_combined = "Combined";
 
-export let display_mode_list; export function set_display_mode_list(k) { display_mode_list = k }
-export let display_node_index_list;  export function set_display_node_index_list(k) { display_node_index_list = k }
+// export let display_mode_list; export function set_display_mode_list(k) { display_mode_list = k }
+// export let display_node_index_list;  export function set_display_node_index_list(k) { display_node_index_list = k }
 export let display_mode;
 
-export let node_index_required;
+// export let node_index_required;
 
 export function run_stop_handler() {
   $("#ctl_run").attr("disabled", "disabled");

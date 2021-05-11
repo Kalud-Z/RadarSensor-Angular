@@ -11,31 +11,28 @@ import { rc_cmds, send_cmd } from './commands.js';
 declare var $: any;
 
 
-
-
-
-export const RE_TOKEN_DELIMS = /[;\n]+/;
-export const TOKEN_DELIMITER = ";"
+// export const RE_TOKEN_DELIMS = /[;\n]+/;
+// export const TOKEN_DELIMITER = ";"
 export const NO_LIMIT = 'U';
 export const FLOAT_FRACTION_DIGITS = 3;
 
-export const cfg_parameters_states = [
-  states_struct('CFG_PARAMETERS_STATE_COUNT',		0),
-  states_struct('CFG_PARAMETERS_STATE_VALUES',	0),
-];
+// export const cfg_parameters_states = [
+//   states_struct('CFG_PARAMETERS_STATE_COUNT',		0),
+//   states_struct('CFG_PARAMETERS_STATE_VALUES',	0),
+// ];
 
-export const cfg_parameter_value_struct = struct(
-  'name',
-  'current_value',
-  'text',
-  'type',
-  'allowed_values'
-);
+// export const cfg_parameter_value_struct = struct(
+//   'name',
+//   'current_value',
+//   'text',
+//   'type',
+//   'allowed_values'
+// );
 
-export let cfg_parameter_value = [];
-export let	cfg_parameter_count = 0;
+// export let cfg_parameter_value = [];
+// export let	cfg_parameter_count = 0;
 
-export function set_cfg_parameter_count(num) { cfg_parameter_count = num }
+// export function set_cfg_parameter_count(num) { cfg_parameter_count = num }
 
 export  function check_parameter(parameter) {
   let i = cfg_parameter_value.findIndex(element => "parameter_input_" + element.name == parameter.id);
@@ -153,12 +150,12 @@ export function update_parameters(){
 }
 
 
-export function init_parameters() {
-  cfg_parameter_count = 0;
-  cfg_parameter_value = [];
-
-  status_clearall(cfg_parameters_states);
-}
+// export function init_parameters() {
+//   cfg_parameter_count = 0;
+//   cfg_parameter_value = [];
+//
+//   status_clearall(cfg_parameters_states);
+// }
 
 
 

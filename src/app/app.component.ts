@@ -20,6 +20,7 @@ import {
   trigger_handler, update_controls,
 } from './controls';
 import { init_parameters, update_parameters } from './config_params';
+import { MainService } from './main.service';
 
 
 declare var $: any;
@@ -36,6 +37,9 @@ declare var $: any;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 export class AppComponent implements AfterViewInit {
+
+  constructor(private mainService: MainService) {
+  }
 
   ngAfterViewInit(): void {
     this.main();
