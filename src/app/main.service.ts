@@ -6,22 +6,17 @@ import { Subject } from 'rxjs';
 })
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
- class MainService {
-
-  constructor() {
-  }
+ export class MainService {
 
 
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§  basics.ts  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
 
-
-// constructor for structs
+  // constructor for structs
   struct = (...keys) => ((...v) => keys.reduce((o, k, i) => {o[k] = v[i]; return o} , {})) ; //it is used outside
 
-
-// convert array buffer to string and strip off trailing 0's
+  // convert array buffer to string and strip off trailing 0's
   decoder = new TextDecoder("utf-8");
 
   arraybuffer2string(buf) { //it is used outside
@@ -31,7 +26,6 @@ import { Subject } from 'rxjs';
     return str[0];
   }
 
-
   // status handling | //it is used outside
   states_struct = this.struct('name', 'status');
 
@@ -39,18 +33,15 @@ import { Subject } from 'rxjs';
     status_array.forEach(element => element.status = 0);
   }
 
-
   status_set(status_array, status_name) {
     // 	status_array[status_array.findIndex(element => element.name == status_name)].status = 1;
     status_array.find(e => e.name == status_name).status = 1;
   }
 
-
   status_clear(status_array, status_name) {
     // 	status_array[status_array.findIndex(element => element.name == status_name)].status = 0;
     status_array.find(e => e.name == status_name).status = 0;
   }
-
 
   status_isset(status_array, status_name) {
     // 	if (status_array[status_array.findIndex(element => element.name == status_name)].status == 1) return true;
@@ -59,14 +50,12 @@ import { Subject } from 'rxjs';
     else return false;
   }
 
-
   status_iscomplete(status_array) {
     let total_status = 0;
     status_array.forEach(element => total_status += element.status);
     if (total_status == status_array.length) return true;
     else return false;
   }
-
 
 
   // websockets handling
@@ -152,8 +141,6 @@ import { Subject } from 'rxjs';
 
 
 
-
-
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§  config_parameters.ts (only variables used outside of config_parameters) §§§§§§§§§§§§§§§§§§§§§§§§
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
@@ -222,7 +209,7 @@ import { Subject } from 'rxjs';
    );
 
 
-    display_mode_info = [
+   display_mode_info = [
       this.display_mode_info_struct('R/D Map',	'FFT2ABSLOG', 'RDMAP'),
       this.display_mode_info_struct('CFAR',	'CFAR'		, 'CFAR')
   ];
@@ -239,10 +226,10 @@ import { Subject } from 'rxjs';
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
     init_controls$ = new Subject<boolean>();
-
     init_graphics$ = new Subject<boolean>();
     update_graphics$ = new Subject<boolean>();
 
+    nodes_headers: any;
 
 
   // header tags
@@ -301,8 +288,6 @@ import { Subject } from 'rxjs';
     'user_data'
   );
 
-    nodes_headers: any;
-
     arraybuffer2node_header(arraybuffer, node_index) {
     let dv = new DataView(arraybuffer);
 
@@ -337,8 +322,6 @@ import { Subject } from 'rxjs';
       arraybuffer.slice(offset_user_data)
     );
   }
-
-
 
     process_pipeline_headers(data_buffer) {
     let number_of_nodes = this.arraybuffer2type_header(data_buffer.slice(0, this.TYPE_HEADER_SIZE_BYTES)).value;
@@ -443,7 +426,6 @@ import { Subject } from 'rxjs';
       this.update_graphics$.next(true);
     }
   }
-
 
 
 
