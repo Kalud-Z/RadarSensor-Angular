@@ -5,9 +5,6 @@ import { MainService } from './main.service';
 declare var $: any;
 
 
-//  declare var $: any;
-
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -15,7 +12,7 @@ declare var $: any;
 })
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
- class AppComponent implements AfterViewInit {
+export class AppComponent implements AfterViewInit {
 
   constructor(private mainService: MainService) {
   }
@@ -40,87 +37,87 @@ declare var $: any;
 
   main() {
     // initialize settings
-    init_window();
-    update_window();
+    this.init_window();
+    this.update_window();
 
     // open websockets connection
     // ws = new_ws(get_appropriate_ws_url(""), "rc");
     // ws = new_ws('ws://192.168.1.101:4000/', "rc");
-    set_ws(new_ws('ws://192.168.1.101:4000/', "rc"))
-
-    ws.binaryType = 'arraybuffer';
+    this.mainService.set_ws(this.mainService.new_ws('ws://192.168.1.101:4000/', "rc"))
+    this.mainService.ws.binaryType = 'arraybuffer';
 
     try {
-      ws.onopen = function() {
-        // ws_state = ws_states.WS_STATE_CONNECTED;
+      this.mainService.ws.onopen = () => {
+        this.mainService.set_ws_state(this.mainService.ws_states.WS_STATE_CONNECTED);
+        console.log('inside ws.open . this is ws_state : ' , this.mainService.ws_state)
 
-        set_ws_state(ws_states.WS_STATE_CONNECTED);
-        console.log('inside ws.open . this is ws_state : ' , ws_state)
-
-        request_initial_config();
+        this.mainService.request_initial_config();
       };
 
-      ws.onmessage = function got_packet(msg) {
-        console.log('we just received data from websocket'); //this is ALWAYS an ArrayBuffer
+      this.mainService.ws.onmessage = (msg) => {
+        // console.log('we just received data from websocket'); //this is ALWAYS an ArrayBuffer
 
-        var type_header = arraybuffer2type_header(msg.data.slice(0, TYPE_HEADER_SIZE_BYTES));
+        let type_header = this.mainService.arraybuffer2type_header(msg.data.slice(0, this.mainService.TYPE_HEADER_SIZE_BYTES));
+
         switch (type_header.tag) {
-          case HEADER_TAG_PIPELINE:
+          case this.mainService.HEADER_TAG_PIPELINE:
             console.log('we just got HEADER_TAG_PIPELINE');
-            process_pipeline_headers(msg.data);
+            this.mainService.process_pipeline_headers(msg.data);
             break;
-          case HEADER_TAG_DATA:
+
+          case this.mainService.HEADER_TAG_DATA:
             console.log('we just got HEADER_TAG_DATA');
-            process_graphics_data(msg.data);
+            this.process_graphics_data(msg.data);
             break;
-          case HEADER_TAG_COMMAND:
-            console.log('we just got HEADER_TAG_COMMAND');
-            process_cmd(msg.data);
+
+          case this.mainService.HEADER_TAG_COMMAND:
+            // console.log('we just got HEADER_TAG_COMMAND');
+            this.mainService.process_cmd(msg.data);
             break;
-          case HEADER_TAG_NODE:
+
+          case this.mainService.HEADER_TAG_NODE:
+
           default:
             console.log("ws receive: ERROR | Unexpected header received: " + type_header.tag);
             break;
         }
       };
 
-      ws.onclose = function(){
-        // ws_state = ws_states.WS_STATE_DISCONNECTED;
-        set_ws_state(ws_states.WS_STATE_DISCONNECTED)
-
+      this.mainService.ws.onclose = () =>{
+        this.mainService.set_ws_state(this.mainService.ws_states.WS_STATE_DISCONNECTED)
         console.log("ws close");
       };
 
-    }  catch(exception) { alert("<p>Error " + exception) }
+    }
+    catch(exception) { alert("<p>Error " + exception) }
 
     // register event handlers
     // window resize
-    $(window).bind('resize', function() {
+    $(window).bind('resize', () => { //TODO : fix this
       if ($("input").is(":focus")) {
         // save id of input field focused during resize and restore focus after update
         // to keep virtual keyboard active on mobile devices
-        var id = $(":focus").attr("id");
-        update_window();
+        let id = $(":focus").attr("id");
+        this.update_window();
         $("#" + id).focus();
       } else {
-        update_window();
+        this.update_window();
       }
     });
     // Runs/RUN/STOP/QUIT
-    $('#ctl_nruns').change(nruns_handler);
-    $('#ctl_run').click(run_stop_handler);
-    $('#ctl_quit').click(quit_handler);
+    $('#ctl_nruns').change(this.nruns_handler);
+    // $('#ctl_run').click(this.run_stop_handler);
+    $('#ctl_quit').click(this.quit_handler);
     // Display mode
-    $('#ctl_display_mode').change(display_mode_handler);
+    $('#ctl_display_mode').change(this.display_mode_handler);
     // trigger source
-    $('#ctl_trigger_source').change(trigger_handler);
-    $('#ctl_trigger_id').change(trigger_handler);
+    $('#ctl_trigger_source').change(this.trigger_handler);
+    $('#ctl_trigger_id').change(this.trigger_handler);
     // cfg file load/save
-    $('#ctl_cfg_file_load_name').change(cfg_file_load_handler);
-    $('#ctl_cfg_file_save').click(cfg_file_save_handler);
+    $('#ctl_cfg_file_load_name').change(this.cfg_file_load_handler);
+    $('#ctl_cfg_file_save').click(this.cfg_file_save_handler);
 
   }
-
 
 
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§ config_params  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
@@ -265,7 +262,10 @@ declare var $: any;
    display_mode;
 
    run_stop_handler() {
+     console.log('run_stop_handler ii called')
     $("#ctl_run").attr("disabled", "disabled");
+
+    console.log('this is rc_state : ' , this.mainService.rc_state);
 
     switch (this.mainService.rc_state) {
       case this.mainService.rc_states.RC_STATE_UNDEFINED:
@@ -496,6 +496,7 @@ declare var $: any;
    nodes_headers;
 
     // default values
+
     // scales
    SCALE_FONT = "sans-serif";
    SCALE_FONTSIZE = 10;
@@ -589,8 +590,8 @@ declare var $: any;
     document.getElementById('grid_graphics_container').style.borderColor = '';
   }
 
-   draw_scale(id_canvas, scale_pos_x, scale_pos_y, scale_size, ticklength, decimal_places, orientation, divs_between_long_ticks,
-              fillstyle, font, fontsize, world_start, world_stop, bins, legend) {
+   draw_scale(id_canvas, scale_pos_x, scale_pos_y, scale_size, ticklength, decimal_places, orientation,
+              divs_between_long_ticks, fillstyle, font, fontsize, world_start, world_stop, bins, legend) {
     let element: any = document.getElementById(id_canvas);
     if (element.getContext) {
       let ctx = element.getContext('2d');
@@ -786,7 +787,7 @@ declare var $: any;
     let id_slider = "#colorbar_slider"
 
     // read values from slider, sort values and write them back to slider
-    let values = $(id_slider).slider("option", "values").sort(function(a,b) { return a - b });
+    let values = $(id_slider).slider("option", "values").sort((a,b) => { return a - b });
     $(id_slider).slider({"values": values});
 
     // adjust heights of colorbar ranges according to slider values
@@ -876,7 +877,9 @@ declare var $: any;
     $("#colorbar_scale_canvas").attr("width", colorbar_scale_width);
 
     // image
-    let max_scale_y_value_size = Math.round(Math.max(this.getWidthOfText(this.mainService.scale_world_start_y.toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE), this.getWidthOfText((scale_world_start_y + scale_world_range_y).toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE)));
+    let max_scale_y_value_size = Math.round(Math.max(this.getWidthOfText(this.mainService.scale_world_start_y.toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE),
+      this.getWidthOfText((this.mainService.scale_world_start_y + this.mainService.scale_world_range_y)
+        .toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE)));
 
     let image_scale_width = graphics_width - (spacer_width + colorbar_slider_width + colorbar_width + colorbar_scale_width);
      this.image_data_offset_x = this.SCALE_TICKLENGTH + max_scale_y_value_size + this.SCALE_TICK2TEXT_DISTANCE + 2 * this.SCALE_FONTSIZE;
@@ -895,7 +898,8 @@ declare var $: any;
     let graphics_height = parseInt($("#grid_graphics_container.box").css("height"), 10);
 
      this.image_data_offset_y = this.SCALE_FONTSIZE / 2;
-     this.image_data_size_y = graphics_height - (this.image_data_offset_y + this.SCALE_TICKLENGTH + this.SCALE_TICK2TEXT_DISTANCE + 3 * this.SCALE_FONTSIZE);
+     this.image_data_size_y = graphics_height -
+       (this.image_data_offset_y + this.SCALE_TICKLENGTH + this.SCALE_TICK2TEXT_DISTANCE + 3 * this.SCALE_FONTSIZE);
 
     // colorbar
     $("#grid_graphics_colorbar_slider").css("height", this.image_data_size_y);
@@ -962,17 +966,17 @@ declare var $: any;
     // use the highest byte only
     switch (this.nodes_headers[node_index].bitwidth) {
       case 8:
-        data = new Uint8Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
+        data = new Uint8Array(data_buffer.slice(this.mainService.TYPE_HEADER_SIZE_BYTES));
         rgba_buf32 = Uint32Array.from(data).map(e => this.scaled_rgbatable[e]);
         break;
 
       case 16:
-        data = new Uint16Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
+        data = new Uint16Array(data_buffer.slice(this.mainService.TYPE_HEADER_SIZE_BYTES));
         rgba_buf32 = Uint32Array.from(data).map(e => this.scaled_rgbatable[e >> 8]);
         break;
 
       case 32:
-        data = new Uint32Array(data_buffer.slice(TYPE_HEADER_SIZE_BYTES));
+        data = new Uint32Array(data_buffer.slice(this.mainService.TYPE_HEADER_SIZE_BYTES));
         rgba_buf32 = data.map(e => this.scaled_rgbatable[e >> 24]);
         break;
 
@@ -984,20 +988,25 @@ declare var $: any;
     rgba_buf8 = new Uint8Array(rgba_buf32.buffer);
 
     // copy RGBA data to canvas
-    let display_mode_received = display_mode_list[display_node_index_list.findIndex(e => e == node_index)];
+    let display_mode_received = this.mainService.display_mode_list[this.mainService.display_node_index_list.findIndex(e => e == node_index)];
 
     switch (display_mode_received) {
       case 'R/D Map':
         this.imgdata_rdmap.data.set(rgba_buf8);
-        this.image_rdmap_canvas_ctx.putImageData(this.imgdata_rdmap, 0, 0, data_image_start_x, data_image_start_y, data_image_range_x, data_image_range_y);
+        this.image_rdmap_canvas_ctx.putImageData(this.imgdata_rdmap, 0, 0, this.mainService.data_image_start_x,
+          this.mainService.data_image_start_y, this.mainService.data_image_range_x, this.mainService.data_image_range_y);
         break;
 
       case 'CFAR':
         this.imgdata_cfar.data.set(rgba_buf8);
-        this.image_cfar_canvas_ctx.putImageData(this.imgdata_cfar, 0, 0, data_image_start_x, data_image_start_y, data_image_range_x, data_image_range_y);
+        this.image_cfar_canvas_ctx.putImageData(this.imgdata_cfar, 0, 0, this.mainService.data_image_start_x,
+          this.mainService.data_image_start_y, this.mainService.data_image_range_x, this.mainService.data_image_range_y);
+
         rgba_buf8 = new Uint8Array(rgba_buf32.map(x => x != this.CFAR_NO_TARGET_COLOR ? this.CFAR_HIGHLIGHT_COLOR : this.CFAR_TRANSPARENT_COLOR).buffer);
         this.imgdata_cfar_highlight.data.set(rgba_buf8);
-        this.image_cfar_highlight_canvas_ctx.putImageData(this.imgdata_cfar_highlight, 0, 0, data_image_start_x, data_image_start_y, data_image_range_x, data_image_range_y);
+
+        this.image_cfar_highlight_canvas_ctx.putImageData(this.imgdata_cfar_highlight, 0, 0, this.mainService.data_image_start_x,
+          this.mainService.data_image_start_y, this.mainService.data_image_range_x, this.mainService.data_image_range_y);
         break;
 
       default:
@@ -1011,7 +1020,7 @@ declare var $: any;
 
    // redraw canvas overlays
    update_canvas_overlays() {
-    if(status_iscomplete(graphics_states)) {
+    if(this.mainService.status_iscomplete(this.mainService.graphics_states)) {
       switch (this.display_mode) {
         case 'R/D Map':
           $("#image_rdmap_canvas").css("z-index", "3");
@@ -1040,22 +1049,22 @@ declare var $: any;
 
     // redraw graphics according to current window dimemsions and scale settings
    update_graphics() {
-    if(status_iscomplete(graphics_states)) {
+    if(this.mainService.status_iscomplete(this.mainService.graphics_states)) {
       this.draw_scales_rdmap();
 
-      this.image_rdmap_canvas.width = data_image_range_x;
-      this.image_rdmap_canvas.height = data_image_range_y;
-      this.imgdata_rdmap = this.image_rdmap_canvas_ctx.getImageData(0, 0, data_image_size_x, data_image_size_y);
+      this.image_rdmap_canvas.width = this.mainService.data_image_range_x;
+      this.image_rdmap_canvas.height = this.mainService.data_image_range_y;
+      this.imgdata_rdmap = this.image_rdmap_canvas_ctx.getImageData(0, 0, this.mainService.data_image_size_x, this.mainService.data_image_size_y);
       $("#image_rdmap_canvas").css("border", "solid 1px black");
 
-      this.image_cfar_canvas.width = data_image_size_x;
-      this.image_cfar_canvas.height = data_image_size_y;
-      this.imgdata_cfar = this.image_cfar_canvas_ctx.getImageData(0, 0, data_image_size_x, data_image_size_y);
+      this.image_cfar_canvas.width = this.mainService.data_image_size_x;
+      this.image_cfar_canvas.height = this.mainService.data_image_size_y;
+      this.imgdata_cfar = this.image_cfar_canvas_ctx.getImageData(0, 0, this.mainService.data_image_size_x, this.mainService.data_image_size_y);
       $("#image_cfar_canvas").css("border", "solid 1px black");
 
-      this.image_cfar_highlight_canvas.width = data_image_size_x;
-      this.image_cfar_highlight_canvas.height = data_image_size_y;
-      this.imgdata_cfar_highlight = this.image_cfar_highlight_canvas_ctx.getImageData(0, 0, data_image_size_x, data_image_size_y);
+      this.image_cfar_highlight_canvas.width = this.mainService.data_image_size_x;
+      this.image_cfar_highlight_canvas.height = this.mainService.data_image_size_y;
+      this.imgdata_cfar_highlight = this.image_cfar_highlight_canvas_ctx.getImageData(0, 0, this.mainService.data_image_size_x, this.mainService.data_image_size_y);
       $("#image_cfar_highlight_canvas").css("border", "solid 1px black");
 
       this.update_canvas_overlays();
@@ -1065,28 +1074,28 @@ declare var $: any;
 
     // initialize graphics settings
    init_graphics() {
-    status_clearall(graphics_states);
+     this.mainService.status_clearall(this.mainService.graphics_states);
 
-    nodes_names = [];
-    nodes_omodes = [];
+     this.mainService.nodes_names = [];
+     this.mainService.nodes_omodes = [];
      this.nodes_headers = [];
 
-    scale_legend_x = '';
-    scale_legend_y = '';
-    data_datatype = '';
-    data_bitwidth = 0;
-    data_image_size_x = 0;
-    data_image_size_y = 0;
-    data_image_start_x = 0;
-    data_image_start_y = 0;
-    data_image_range_x = 0;
-    data_image_range_y = 0;
-    scale_world_start_x = 0;
-    scale_world_start_y = 0;
-    scale_world_range_x = 0;
-    scale_world_range_y = 0;
-    res_x = 0;
-    res_y = 0;
+     this.mainService.scale_legend_x = '';
+     this.mainService.scale_legend_y = '';
+     this.mainService.data_datatype = '';
+     this.mainService.data_bitwidth = 0;
+     this.mainService.data_image_size_x = 0;
+     this.mainService.data_image_size_y = 0;
+     this.mainService.data_image_start_x = 0;
+     this.mainService.data_image_start_y = 0;
+     this.mainService.data_image_range_x = 0;
+     this.mainService.data_image_range_y = 0;
+     this.mainService.scale_world_start_x = 0;
+     this.mainService.scale_world_start_y = 0;
+     this.mainService.scale_world_range_x = 0;
+     this.mainService.scale_world_range_y = 0;
+     this.mainService.res_x = 0;
+     this.mainService.res_y = 0;
 
     $("#colorbar_slider").slider({
       orientation: "vertical",
@@ -1094,7 +1103,7 @@ declare var $: any;
       min: 0,
       max: 255,
       slide: function() {
-        adjust_colorbar();
+        this.mainService.adjust_colorbar();
       }
     });
 
@@ -1118,21 +1127,22 @@ declare var $: any;
   }
 
 
+
+  init_window() {
+    this.init_graphics();
+    this.init_controls();
+    this.mainService.init_parameters();
+  }
+
+
+  update_window() {
+    this.adjust_graphics();
+    this.update_graphics();
+    this.update_controls();
+    this.update_parameters();
+  }
+
+
 }  //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 
-
-
-function init_window() {
-  init_graphics();
-  init_controls();
-  init_parameters();
-}
-
-
-function update_window() {
-  adjust_graphics();
-  update_graphics();
-  update_controls();
-  update_parameters();
-}

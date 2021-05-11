@@ -187,7 +187,7 @@ import { Subject } from 'rxjs';
     };
   // Object.freeze(rc_states); //TODO : do
 
-  rc_state; set_rc_state(state) {  this.rc_state = state }
+  public rc_state: number = 0; set_rc_state(state : number) { console.log('set_rc_state is called') ;  this.rc_state = state ; console.log('this is rc_state : ' , this.rc_state);  }
 
   controls_states = [
      this.states_struct('CONTROLS_STATE_CFG_FILES',	0),
@@ -525,10 +525,10 @@ import { Subject } from 'rxjs';
     send_cmd(rc_cmd, ...args) {
     let sendstring = this.rc_cmd2cmd_short(rc_cmd) + this.TOKEN_DELIMITER + [...args].join(this.TOKEN_DELIMITER) + "\n";
 
-    console.log('inside send_cmd . ws_state : ' , this.ws_state);
+    // console.log('inside send_cmd . ws_state : ' , this.ws_state);
 
     if (this.ws_state == this.ws_states.WS_STATE_CONNECTED) {
-      console.log('inside send_cmd . yes ws is connected')
+      // console.log('inside send_cmd . yes ws is connected')
       // no unresponded cmds before sending a new one
       if (this.rc_cmd_sent == -1) {
         this.ws.send(sendstring);

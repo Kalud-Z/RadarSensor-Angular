@@ -33,7 +33,7 @@
     <div id="grid_control_container" class="box"> <!--	these elements are being handled by rc_controls.js	-->
         <div>
             <input type="button" value="Quit" id="ctl_quit">
-            <input type="button" id="ctl_run">
+            <input type="button" id="ctl_run" (click)="run_stop_handler()">
             <label for="ctl_nruns">Runs (0=endless):</label>
             <input type="number" id="ctl_nruns" name="ctl_nruns" min="0">
         </div>
