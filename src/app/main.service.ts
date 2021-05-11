@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -191,7 +192,7 @@ import { Injectable } from '@angular/core';
 
   trigger_id;    set_trigger_id(k) { this.trigger_id = k }
 
-    rc_states = {
+  rc_states = {
       'RC_STATE_UNDEFINED': 0,
       'RC_STATE_HALT':      1,
       'RC_STATE_GO':        2,
@@ -199,14 +200,17 @@ import { Injectable } from '@angular/core';
     };
   // Object.freeze(rc_states); //TODO : do
 
+  rc_state; set_rc_state(state) {  this.rc_state = state }
 
-   controls_states = [
+  controls_states = [
      this.states_struct('CONTROLS_STATE_CFG_FILES',	0),
      this.states_struct('CONTROLS_STATE_STATUS',		0)
    ];
 
+  ctl_nruns;  set_ctl_nruns(k) { this.ctl_nruns = k }
 
-    // cfg file list
+
+  // cfg file list
    cfg_file_current;   set_cfg_file_current(file) { this.cfg_file_current = file }
    cfg_file_list;   set_cfg_file_list(list) { this.cfg_file_list = list }
 
@@ -234,9 +238,14 @@ import { Injectable } from '@angular/core';
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§  headers.ts  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
+    init_controls$ = new Subject<boolean>();
+
+    init_graphics$ = new Subject<boolean>();
+    update_graphics$ = new Subject<boolean>();
 
 
-    // header tags
+
+  // header tags
     HEADER_TAG_PIPELINE = "PH";
     HEADER_TAG_NODE = "NH";
     HEADER_TAG_DATA = "DH";
@@ -330,6 +339,7 @@ import { Injectable } from '@angular/core';
   }
 
 
+
     process_pipeline_headers(data_buffer) {
     let number_of_nodes = this.arraybuffer2type_header(data_buffer.slice(0, this.TYPE_HEADER_SIZE_BYTES)).value;
     let nodes_headers = []; // TODO : this wouldn't work. you need initialize all indexes with 0 at first, then change them.
@@ -344,7 +354,10 @@ import { Injectable } from '@angular/core';
       // reset cfg_parameters/controls, request initial config
       console.log("WARNING: Pipeline header received, but basic configuration is not complete");
       this.init_parameters();
-      init_controls(); //subject
+
+      // init_controls(); //subject
+      this.init_controls$.next(true);
+
       this.request_initial_config();
       return;
     }
@@ -354,7 +367,10 @@ import { Injectable } from '@angular/core';
       (!this.status_isset(this.graphics_states, 'GRAPHICS_STATE_NODES_OMODES'))) {
       // reset graphics, request nodes names/omodes
       console.log("WARNING: Pipeline header received, but nodes names/output configuration not complete");
-      init_graphics(); //subject
+
+      // init_graphics(); //subject
+      this.init_graphics$.next(true);
+
       this.send_cmd(this.rc_cmds.CMD_RC_NODES_NAMES);
       this.send_cmd(this.rc_cmds.CMD_RC_NODES_OMODES);
       return;
@@ -379,7 +395,11 @@ import { Injectable } from '@angular/core';
       this.set_res_x(0);
       this.set_res_y(0);
       this.status_set(this.graphics_states, 'GRAPHICS_STATE_SCALES');
-      update_graphics(); //subject
+
+      // update_graphics(); //subject
+      this.update_graphics$.next(true);
+
+
       return;
     }
 
@@ -419,18 +439,27 @@ import { Injectable } from '@angular/core';
       this.set_res_x(this.scale_world_range_x / (this.data_image_range_x - 1));
       this.set_res_y(this.scale_world_range_y / (this.data_image_range_y - 1));
       this.status_set(this.graphics_states, 'GRAPHICS_STATE_SCALES');
-      update_graphics(); //subject
+      // update_graphics(); //subject
+      this.update_graphics$.next(true);
     }
   }
 
 
 
 
-  //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§  commands.ts  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
-  //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+  //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§  commands.ts  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+  //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
+
+  set_data_invalid_marker$ = new Subject<boolean>();
+  update_parameters$ = new Subject<boolean>();
+  update_cfg_file_list$ = new Subject<boolean>();
+  update_controls$ = new Subject<boolean>();
+  update_display_mode_list$ = new Subject<boolean>();
+  clear_data_invalid_marker$ = new Subject<boolean>();
+  update_trigger$ = new Subject<boolean>();
 
 
-    rc_cmds = {
+  rc_cmds = {
     'CMD_RC_CFG_UNKNOWN':	  -1,
     'CMD_RC_UNKNOWN':	  0,
     'CMD_RC_RUN_GO':			  1,
@@ -549,7 +578,8 @@ import { Injectable } from '@angular/core';
   }
 
 
-    process_cmd (data_buffer) {
+
+  process_cmd (data_buffer) {
     // convert command string into array of strings
     let cmd_array = this.arraybuffer2string(data_buffer.slice(this.TYPE_HEADER_SIZE_BYTES)).split(this.RE_TOKEN_DELIMS);
 
@@ -573,7 +603,8 @@ import { Injectable } from '@angular/core';
     // process commands
     switch (rc_cmd) {
       case this.rc_cmds.CMD_RC_DATA_INVALID:
-        set_data_invalid_marker();
+        // set_data_invalid_marker();
+        this.set_data_invalid_marker$.next(true);
         break;
 
       case this.rc_cmds.CMD_RC_CFG_COUNT:
@@ -583,7 +614,10 @@ import { Injectable } from '@angular/core';
           // reset cfg_parameters values, request new set of cfg parameters
           console.log("WARNING: Number of cfg parameters has changed");
           this.init_parameters();
-          update_parameters();
+
+          // update_parameters();
+          this.update_parameters$.next(true);
+
           this.send_cmd(this.rc_cmds.CMD_RC_CFG_VALUE);
         }
 
@@ -609,7 +643,9 @@ import { Injectable } from '@angular/core';
           // reset cfg parameters values and
           // request number of configuration parameters + full set of cfg parameters first
           this.init_parameters();
-          update_parameters();
+          // update_parameters();
+          this.update_parameters$.next(true);
+
           this.send_cmd(this.rc_cmds.CMD_RC_CFG_COUNT);
           this.send_cmd(this.rc_cmds.CMD_RC_CFG_VALUE);
           return;
@@ -632,7 +668,9 @@ import { Injectable } from '@angular/core';
           this.status_set(this.cfg_parameters_states, 'CFG_PARAMETERS_STATE_VALUES');
         }
 
-        update_parameters();
+        // update_parameters();
+        this.update_parameters$.next(true);
+
         break;
 
       case this.rc_cmds.CMD_RC_CFG_FILES:
@@ -646,15 +684,21 @@ import { Injectable } from '@angular/core';
         } else {
           this.status_set(this.controls_states, 'CONTROLS_STATE_CFG_FILES');
         }
-        update_cfg_file_list();
+
+        // update_cfg_file_list();
+        this.update_cfg_file_list$.next(true);
+
         break;
 
       case this.rc_cmds.CMD_RC_CFG_LOAD:
         cfg_file = cmd_array.splice(1, 1);
-        if (cfg_file.length == 0) { alert("ERROR: Could not load configuration file")}
+        if (cfg_file.length == 0) { alert("ERROR: Could not load configuration file") }
         // cfg_file_current = cfg_file;
-        this.set_cfg_file_current(cfg_file)
-        update_cfg_file_list();
+        this.set_cfg_file_current(cfg_file);
+
+        // update_cfg_file_list();
+        this.update_cfg_file_list$.next(true);
+
         break;
 
       case this.rc_cmds.CMD_RC_CFG_SAVE:
@@ -663,7 +707,9 @@ import { Injectable } from '@angular/core';
         else {
           // cfg_file_current = cfg_file;
           this.set_cfg_file_current(cfg_file)
-          update_controls();
+          // update_controls();
+          this.update_controls$.next(true);
+
         }
         this.send_cmd(this.rc_cmds.CMD_RC_CFG_FILES); // request current list of cfg files
         break;
@@ -730,52 +776,54 @@ import { Injectable } from '@angular/core';
           // }
 
           // update display mode list
-          update_display_mode_list();
+          // update_display_mode_list();
+          this.update_display_mode_list$.next(true);
 
           // update graphics configuration state
           this.status_set(this.graphics_states, 'GRAPHICS_STATE_NODES_OMODES');
 
-          update_graphics();
+          // update_graphics();
+          this.update_graphics$.next(true)
         }
         break;
 
       case this.rc_cmds.CMD_RC_RUN_HALT:
-        // rc_state = rc_states.RC_STATE_HALT;
-        set_rc_state(this.rc_states.RC_STATE_HALT)
+        this.set_rc_state(this.rc_states.RC_STATE_HALT);
+
         this.status_set(this.controls_states, 'CONTROLS_STATE_STATUS');
-        update_parameters();
-        update_controls();
+        this.update_parameters$.next(true);
+        this.update_controls$.next(true);
+
         break;
 
       case this.rc_cmds.CMD_RC_RUN_GO:
-        // rc_state = rc_states.RC_STATE_GO;
-        set_rc_state(this.rc_states.RC_STATE_GO)
+        this.set_rc_state(this.rc_states.RC_STATE_GO)
 
         // ctl_nruns = parseInt(cmd_array[1], 10); //TODO : not sure about this one.
-        set_ctl_nruns(parseInt(cmd_array[1], 10));
+        this.set_ctl_nruns(parseInt(cmd_array[1], 10));
 
         // trigger_id = parseInt(cmd_array[2], 10);
         this.set_trigger_id(parseInt(cmd_array[2], 10));
 
 
         this.status_set(this.controls_states, 'CONTROLS_STATE_STATUS');
-        clear_data_invalid_marker();
-        update_trigger();
-        update_parameters();
-        update_controls();
+        this.clear_data_invalid_marker$.next(true);
+        this.update_trigger$.next(true);
+        this.update_parameters$.next(true);
+        this.update_controls$.next(true);
         break;
 
       case this.rc_cmds.CMD_RC_RUN_QUIT:
         // rc_state = rc_states.RC_STATE_QUIT;
-        set_rc_state(this.rc_states.RC_STATE_QUIT)
+        this.set_rc_state(this.rc_states.RC_STATE_QUIT)
 
         let quit_return_value = cmd_array.splice(1, 1); // TODO: in legacy_code this let was not declared before. still the code worked !
         if (quit_return_value.length == 0) { quit_return_value[0] = '0' }
-        clear_data_invalid_marker();
+        this.clear_data_invalid_marker$.next(true);
         this.init_parameters();
-        init_controls();
-        update_parameters();
-        update_controls();
+        this.init_controls$.next(true);
+        this.update_parameters$.next(true);
+        this.update_controls$.next(true);
         alert("Radar control software has been terminated.\nExit status: " + quit_return_value[0]);
         break;
 

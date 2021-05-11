@@ -30,8 +30,7 @@ export const trigger_id_external_hw = 2;
 // };
 // Object.freeze(rc_states);
 
-export let rc_state;
-export function set_rc_state(state) {  rc_state = state }
+// export let rc_state; export function set_rc_state(state) {  rc_state = state }
 
 // export const controls_states = [
 //   states_struct('CONTROLS_STATE_CFG_FILES',	0),
@@ -99,7 +98,7 @@ export function quit_handler() {
   $("#ctl_quit").attr("disabled", "disabled");
 }
 
-export let ctl_nruns; export function set_ctl_nruns(k) { ctl_nruns = k }
+// export let ctl_nruns; export function set_ctl_nruns(k) { ctl_nruns = k }
 
 export function nruns_handler() {
   ctl_nruns = $('#ctl_nruns').val();
