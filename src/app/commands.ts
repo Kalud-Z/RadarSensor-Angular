@@ -134,7 +134,11 @@ export function rc_cmd2cmd_short(rc_cmd) {
 
 export function send_cmd(rc_cmd, ...args) {
   let sendstring = rc_cmd2cmd_short(rc_cmd) + TOKEN_DELIMITER + [...args].join(TOKEN_DELIMITER) + "\n";
+
+  console.log('inside send_cmd . ws_state : ' , ws_state);
+
   if (ws_state == ws_states.WS_STATE_CONNECTED) {
+    console.log('inside send_cmd . yes ws is connected')
     // no unresponded cmds before sending a new one
     if (rc_cmd_sent == -1) {
       ws.send(sendstring);
@@ -145,6 +149,7 @@ export function send_cmd(rc_cmd, ...args) {
     }
   }
   else {
+    console.log('inside send_cmd .  ws is NOT connected')
     console.log("ws send: Not connected - can't send \"" + sendstring + "\"");
   }
 }

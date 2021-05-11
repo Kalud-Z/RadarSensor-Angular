@@ -57,7 +57,7 @@ export class AppComponent implements AfterViewInit {
       ws.onopen = function() {
         // ws_state = ws_states.WS_STATE_CONNECTED;
 
-        set_ws_state(ws_states.WS_STATE_CONNECTED)
+        set_ws_state(ws_states.WS_STATE_CONNECTED);
         console.log('inside ws.open . this is ws_state : ' , ws_state)
 
         request_initial_config();
