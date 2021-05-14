@@ -1,6 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
+
+export interface Parameter {
+  name: string | any,
+  current_value: string | any,
+  text: string | any,
+  type: string | any,
+  allowed_values: string | any
+
+}
+
+
+
 @Injectable({
   providedIn: 'root'
 })
@@ -162,7 +174,8 @@ import { Subject } from 'rxjs';
     );
 
 
-   cfg_parameter_value = [];
+
+   cfg_parameter_value: Parameter[] = [];
    cfg_parameter_count = 0; set_cfg_parameter_count(num) { this.cfg_parameter_count = num }
 
 

@@ -31,35 +31,71 @@
     </div>
 
     <div id="grid_control_container" class="box"> <!--	these elements are being handled by rc_controls.js	-->
-        <div>
+        <div class="mainButtonsWrapper controlWrapper">
             <input type="button" value="Quit" id="ctl_quit">
-            <input type="button" id="ctl_run" (click)="run_stop_handler()">
+            <input type="button" id="ctl_run" class="startButton" (click)="run_stop_handler()">
+        </div>
+
+        <div class="ctl_nrunsWrapper controlWrapper">
             <label for="ctl_nruns">Runs (0=endless):</label>
             <input type="number" id="ctl_nruns" name="ctl_nruns" min="0">
         </div>
-        <div>
-            <label for="ctl_cfg_file_load_name">Load Config File:</label>
-            <select id="ctl_cfg_file_load_name"></select>
-            <label for="ctl_cfg_file_save_name">Save Config File:</label>
-            <input type="text" id="ctl_cfg_file_save_name" name="ctl_cfg_file_save_name">
-            <input type="button" value="Save" id="ctl_cfg_file_save">
+
+        <div class="configFileSettingsWrapper controlWrapper" >
+            <div class="configFileSettingsWrapper_child1">
+                <label for="ctl_cfg_file_load_name">Load Config File:</label>
+                <select id="ctl_cfg_file_load_name"></select>
+            </div>
+
+
+            <div class="configFileSettingsWrapper_child2">
+                <div class="inputWrapper">
+                    <label for="ctl_cfg_file_save_name">Save Config File:</label>
+                    <input type="text" id="ctl_cfg_file_save_name" name="ctl_cfg_file_save_name">
+                </div>
+
+                <div class="buttonWrapper">
+                    <input type="button" value="Save" id="ctl_cfg_file_save">
+                </div>
+            </div>
         </div>
-        <div>
-            <label for="ctl_trigger_source">Trigger Source:</label>
-            <select id="ctl_trigger_source">
-                <option>Internal</option>
-                <option>External (HW)</option>
-                <option>External (SW)</option>
-            </select>
-            <label for="ctl_trigger_id">Ext. SW Trigger ID:</label>
-            <input type="number" id="ctl_trigger_id" name="ctl_trigger_id">
+
+        <div class="triggerSourceSettingsWrapper controlWrapper">
+            <div class="input1">
+                <label for="ctl_trigger_source">Trigger Source:</label>
+                <select id="ctl_trigger_source">
+                    <option>Internal</option>
+                    <option>External (HW)</option>
+                    <option>External (SW)</option>
+                </select>
+            </div>
+
+            <div class="input2">
+                <label for="ctl_trigger_id">Ext. SW Trigger ID: </label>
+                <input type="number" id="ctl_trigger_id" name="ctl_trigger_id">
+            </div>
         </div>
-        <div>
+
+        <div class="displayModeWrapper controlWrapper">
             <label for="ctl_display_mode">Display Mode:</label>
             <select id="ctl_display_mode"></select>
         </div>
-    </div>
+    </div><hr>
 
     <div id="grid_parameters_container" class="box"> <!-- this element being handled by rc_cfg_parameters -->
+        <div *ngFor="let param of this.mainService.cfg_parameter_value"  [id]="['parameter_' + param.name]" class="paramWrapper">
+          <label [for]="['parameter_' + param.name]" >  {{ param.text }} : </label>
+            <ng-container [ngSwitch]="param.type">
+                <input  *ngSwitchCase="'I'"  type='number' [name]="['parameter_input_' + param.name]" [id]="['parameter_input_' + param.name]"
+                       (change)="check_parameter(param)"  [min]="getMinValue(param)"  [max]="getMaxValue(param)" [value]="getValue(param)">
+
+                <select *ngSwitchCase="'L'" [id]="['parameter_input_' + param.name]"  [value]="[param.current_value]"  (change)="check_parameter(param)">
+                    <option *ngFor="let opt of param.allowed_values.split(this.mainService.TOKEN_DELIMITER)" > {{ opt }} </option>
+                </select>
+
+                <input  *ngSwitchCase="'F'"  type='text' [name]="['parameter_input_' + param.name]" [id]="['parameter_input_' + param.name]"
+                        (change)="check_parameter(param)"  [value]="getValueForOptionF(param)">
+            </ng-container>
+        </div>
     </div>
 </div>

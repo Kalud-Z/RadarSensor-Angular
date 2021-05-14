@@ -3,6 +3,15 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
 
+:root {
+  --element_width: 110px;
+  --input_width_offset: -10px;
+  --borderlines: solid 1px #d3d3d3;
+
+  --label-font-size: 1.2rem;
+  --value-font-size: 1.2rem;
+}
+
 
 * {
   margin: 0;

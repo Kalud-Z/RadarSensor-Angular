@@ -1,4 +1,4 @@
-import { AfterViewInit, Component } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component } from '@angular/core';
 import { MainService } from './main.service';
 
 
@@ -13,8 +13,11 @@ declare var $: any;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 export class AppComponent implements AfterViewInit {
+  showParameters: boolean  = false;
 
-  constructor(private mainService: MainService) {
+  constructor(
+    private cdr: ChangeDetectorRef,
+    public mainService: MainService) {
   }
 
   ngAfterViewInit(): void {
@@ -93,17 +96,17 @@ export class AppComponent implements AfterViewInit {
 
     // register event handlers
     // window resize
-    // $(window).bind('resize', () => { //TODO : fix this
-    //   if ($("input").is(":focus")) {
-    //     // save id of input field focused during resize and restore focus after update
-    //     // to keep virtual keyboard active on mobile devices
-    //     let id = $(":focus").attr("id");
-    //     this.update_window();
-    //     $("#" + id).focus();
-    //   } else {
-    //     this.update_window();
-    //   }
-    // });
+    $(window).bind('resize', () => { //TODO : fix this
+      if ($("input").is(":focus")) {
+        // save id of input field focused during resize and restore focus after update
+        // to keep virtual keyboard active on mobile devices
+        let id = $(":focus").attr("id");
+        this.update_window();
+        $("#" + id).focus();
+      } else {
+        this.update_window();
+      }
+    });
 
     // Runs/RUN/STOP/QUIT
     $('#ctl_nruns').change(this.nruns_handler);
@@ -131,17 +134,21 @@ export class AppComponent implements AfterViewInit {
    FLOAT_FRACTION_DIGITS = 3;
 
    check_parameter(parameter) {
-    let i = this.mainService.cfg_parameter_value.findIndex(element => "parameter_input_" + element.name == parameter.id);
-    let name = this.mainService.cfg_parameter_value[i].name;
-    // let input_id = parameter.id;
+     console.log('check_parameter is called');
+
+     // let i = this.mainService.cfg_parameter_value.findIndex(element => "parameter_input_" + element.name == parameter.id);
+    // let name = this.mainService.cfg_parameter_value[i].name;
+    let name = parameter.name;
     let input_id = 'parameter_input_' + name;
-    let value_old = this.mainService.cfg_parameter_value[i].current_value;
+
+    // let value_old = this.mainService.cfg_parameter_value[i].current_value;
+    let value_old = parameter.current_value;
 
     let value: number | string;
     let min;
     let max;
 
-    switch (this.mainService.cfg_parameter_value[i].type) {
+    switch (parameter.type) {
       case "L": // list: correct by design
         break;
 
@@ -149,8 +156,8 @@ export class AppComponent implements AfterViewInit {
         // int: auto correct values if limits exceeded
         value = parseInt($("#" + input_id).val() as string);
         if (isNaN(value)) { value = 0; $("#" + input_id).val(value) }
-        min = this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0];
-        max = this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1];
+        min = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0];
+        max = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1];
         if (min != this.NO_LIMIT && value < parseInt(min)) { $("#" + input_id).val(parseInt(min)) }
         if (max != this.NO_LIMIT && value > parseInt(max)) { $("#" + input_id).val(parseInt(max)) }
 
@@ -160,8 +167,8 @@ export class AppComponent implements AfterViewInit {
         // float: auto correct values if limits exceeded
         value = parseFloat($("#" + input_id).val() as string);
         if (isNaN(value)) value = 0;
-        min = this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0];
-        max = this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1];
+        min = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0];
+        max = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1];
         if (min != this.NO_LIMIT && value < parseFloat(min)) {  $("#" + input_id).val(parseFloat(min)) }
         if (max != this.NO_LIMIT && value > parseFloat(max)) {  $("#" + input_id).val(parseFloat(max)) }
         // show float values in exponential number format
@@ -169,7 +176,7 @@ export class AppComponent implements AfterViewInit {
         break;
 
       default:
-        console.log("ERROR: Unknown type " + this.mainService.cfg_parameter_value[i].type + " for cfg parameter " + name);
+        console.log("ERROR: Unknown type " + parameter.type + " for cfg parameter " + name);
     }
 
     // request update of cfg parameter value only if parameter value changed
@@ -182,67 +189,91 @@ export class AppComponent implements AfterViewInit {
     }
 
     // store new parameter value
-     this.mainService.cfg_parameter_value[i].current_value = $("#" + input_id).val();
+     parameter.current_value = $("#" + input_id).val();
   }
 
-   update_parameters(){
-    // remove old cfg parameter labels and inputs
-    $("#grid_parameters_container *").remove();
+   update_parameters() {
+     console.log('update_parameters is called');
+     console.log('this is param_value : ' , this.mainService.cfg_parameter_value);
 
-    // generate full set of cfg parameter labels and inputs
-    for (let i in this.mainService.cfg_parameter_value) {
-      let name = this.mainService.cfg_parameter_value[i].name;
-      let value = this.mainService.cfg_parameter_value[i].current_value;
-      let div_id = 'parameter_' + name;
-      let input_id = 'parameter_input_' + name;
-      let label_text = this.mainService.cfg_parameter_value[i].text + ": ";
-      $("#grid_parameters_container").append("<div id='" + div_id + "'></div>");
-      $("#" + div_id).append("<label for='" + input_id + "'>" + label_text + "</label>");
-      switch (this.mainService.cfg_parameter_value[i].type) {
-        case "I":
-          $("#" + div_id).append("<input type='number' name='" + input_id + "' id='" + input_id + "' onchange=check_parameter(this)>");
-          $("#" + input_id).attr('min', parseFloat(this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0]));
-          $("#" + input_id).attr('max', parseFloat(this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1]));
-          $("#" + input_id).val(Math.floor(value));
-          break;
+    //
+    //  // remove old cfg parameter labels and inputs
+    // $("#grid_parameters_container *").remove();
+    // this.showParameters = false;
+    // this.cdr.detectChanges();
+    //
+    //  console.log('we area bout to update the params. and this is  cfg_parameter_value :' , this.mainService.cfg_parameter_value);
+    //
+    // // generate full set of cfg parameter labels and inputs
+    // for (let i in this.mainService.cfg_parameter_value) {
+    //   let name = this.mainService.cfg_parameter_value[i].name;
+    //   let value = this.mainService.cfg_parameter_value[i].current_value;
+    //   let div_id = 'parameter_' + name;
+    //   let input_id = 'parameter_input_' + name;
+    //   let label_text = this.mainService.cfg_parameter_value[i].text + ": ";
+    //   $("#grid_parameters_container").append("<div id='" + div_id + "'></div>");
+    //   $("#" + div_id).append("<label for='" + input_id + "'>" + label_text + "</label>");
+    //
+    //   // <div id="'parameter_' + this.mainService.cfg_parameter_value[i].name">
+    //   // <label for='input_id '>  label_text + </label>
+    //   // ==> here we append 1 of 3 options. (I , L or F)
+    //   // </div>
+    //
+    //   switch (this.mainService.cfg_parameter_value[i].type) {
+    //     case "I":  // <input type='number'>
+    //       $("#" + div_id).append("<input type='number' name='" + input_id + "' id='" + input_id + "' onchange=check_parameter(this)>");
+    //       $("#" + input_id).attr('min', parseFloat(this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0]));
+    //       $("#" + input_id).attr('max', parseFloat(this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1]));
+    //       $("#" + input_id).val(Math.floor(value));
+    //       break;
+    //
+    //     case "L":  // <select> with many <option>
+    //       $("#" + div_id).append("<select id='" + input_id + "' onchange=check_parameter(this)></select>");
+    //       for (let k in this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)) {
+    //         $("#" + input_id).append("<option>" + this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[k]
+    //           + "</option>");
+    //       }
+    //       $("#" + input_id).val(value);
+    //       break;
+    //
+    //     case "F": //<input type='text'>
+    //       $("#" + div_id).append("<input type='text' name='" + input_id + "' id='" + input_id + "' onchange=check_parameter(this)>");
+    //       $("#" + input_id).val(parseFloat(value).toExponential(this.FLOAT_FRACTION_DIGITS));
+    //       break;
+    //
+    //     default:
+    //       console.log("ERROR: Unknown type " + this.mainService.cfg_parameter_value[i].type + " for cfg parameter " + name);
+    //   }
+    //
+    //   switch (this.mainService.rc_state) {
+    //     case this.mainService.rc_states.RC_STATE_QUIT:
+    //
+    //     case this.mainService.rc_states.RC_STATE_UNDEFINED:
+    //
+    //     case this.mainService.rc_states.RC_STATE_GO:
+    //       $("#" + input_id).attr("disabled", "disabled");
+    //       break;
+    //
+    //     case this.mainService.rc_states.RC_STATE_HALT:
+    //       $("#" + input_id).removeAttr("disabled");
+    //       if ($('#ctl_trigger_source').val() != "Internal") {
+    //         $('#parameter_input_timer_period_ms').attr('disabled', 'disabled');
+    //       }
+    //       break;
+    //     default:
+    //       console.log("ERROR: Unknown state: " + this.mainService.rc_state);
+    //       break;
+    //   }
+    // }
+    //
+    //  this.showParameters = true;
+    //  this.cdr.detectChanges();
+   }
 
-        case "L":
-          $("#" + div_id).append("<select id='" + input_id + "' onchange=check_parameter(this)></select>");
-          for (let k in this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)) {
-            $("#" + input_id).append("<option>" + this.mainService.cfg_parameter_value[i].allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[k] + "</option>");
-          }
-          $("#" + input_id).val(value);
-          break;
-
-        case "F":
-          $("#" + div_id).append("<input type='text' name='" + input_id + "' id='" + input_id + "' onchange=check_parameter(this)>");
-          $("#" + input_id).val(parseFloat(value).toExponential(this.FLOAT_FRACTION_DIGITS));
-          break;
-
-        default:
-          console.log("ERROR: Unknown type " + this.mainService.cfg_parameter_value[i].type + " for cfg parameter " + name);
-      }
-      switch (this.mainService.rc_state) {
-        case this.mainService.rc_states.RC_STATE_QUIT:
-
-        case this.mainService.rc_states.RC_STATE_UNDEFINED:
-
-        case this.mainService.rc_states.RC_STATE_GO:
-          $("#" + input_id).attr("disabled", "disabled");
-          break;
-
-        case this.mainService.rc_states.RC_STATE_HALT:
-          $("#" + input_id).removeAttr("disabled");
-          if ($('#ctl_trigger_source').val() != "Internal") {
-            $('#parameter_input_timer_period_ms').attr('disabled', 'disabled');
-          }
-          break;
-        default:
-          console.log("ERROR: Unknown state: " + this.mainService.rc_state);
-          break;
-      }
-    }
-  }
+  getMinValue(param)  { return  parseFloat(param.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0]) }
+  getMaxValue(param)  { return  parseFloat(param.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1]) }
+  getValue(param)     { return  Math.floor(param.current_value); }
+  getValueForOptionF(param) { return  parseFloat(param.current_value).toExponential(this.FLOAT_FRACTION_DIGITS) }
 
 
 
@@ -280,6 +311,7 @@ export class AppComponent implements AfterViewInit {
         break;
 
       case this.mainService.rc_states.RC_STATE_GO:
+        console.log('RC_STATE_GO and we sending command now')
         this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_RUN_HALT);
         break;
 
