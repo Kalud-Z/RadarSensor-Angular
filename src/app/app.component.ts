@@ -93,17 +93,18 @@ export class AppComponent implements AfterViewInit {
 
     // register event handlers
     // window resize
-    $(window).bind('resize', () => { //TODO : fix this
-      if ($("input").is(":focus")) {
-        // save id of input field focused during resize and restore focus after update
-        // to keep virtual keyboard active on mobile devices
-        let id = $(":focus").attr("id");
-        this.update_window();
-        $("#" + id).focus();
-      } else {
-        this.update_window();
-      }
-    });
+    // $(window).bind('resize', () => { //TODO : fix this
+    //   if ($("input").is(":focus")) {
+    //     // save id of input field focused during resize and restore focus after update
+    //     // to keep virtual keyboard active on mobile devices
+    //     let id = $(":focus").attr("id");
+    //     this.update_window();
+    //     $("#" + id).focus();
+    //   } else {
+    //     this.update_window();
+    //   }
+    // });
+
     // Runs/RUN/STOP/QUIT
     $('#ctl_nruns').change(this.nruns_handler);
     // $('#ctl_run').click(this.run_stop_handler);

@@ -17,12 +17,13 @@ html, body {
   margin: 5px;
 }
 
+
 #grid_top {
   overflow: scroll;
   display: grid;
   grid-template-columns: auto;
   grid-template-rows: 75% auto auto;
-  height: 100%;
+  height: 100vh;
 }
 
 #grid_graphics_container			{grid-row: 1; grid-column: 1;}
