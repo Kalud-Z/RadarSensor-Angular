@@ -32,19 +32,21 @@
 
     <div id="grid_control_container" class="box"> <!--	these elements are being handled by rc_controls.js	-->
         <div class="mainButtonsWrapper controlWrapper">
-            <input type="button" value="Quit" id="ctl_quit">
+            <input type="button" value="Quit" id="ctl_quit" (click)="quit_handler()" >
             <input type="button" id="ctl_run" class="startButton" (click)="run_stop_handler()">
         </div>
 
         <div class="ctl_nrunsWrapper controlWrapper">
             <label for="ctl_nruns">Runs (0=endless):</label>
-            <input type="number" id="ctl_nruns" name="ctl_nruns" min="0">
+            <input type="number" id="ctl_nruns" name="ctl_nruns" min="0" [(ngModel)]="valueOf_ctl_nruns" (change)="nruns_handler()">
         </div>
 
         <div class="configFileSettingsWrapper controlWrapper" >
             <div class="configFileSettingsWrapper_child1">
                 <label for="ctl_cfg_file_load_name">Load Config File:</label>
-                <select id="ctl_cfg_file_load_name"></select>
+                <select id="ctl_cfg_file_load_name" (change)="this.cfg_file_load_handler()" [(ngModel)]="valueOf_ctl_cfg_file_load_name">
+                    <option *ngFor="let file of this.mainService.cfg_file_list"> {{ file }} </option>
+                </select>
             </div>
 
 
@@ -55,7 +57,7 @@
                 </div>
 
                 <div class="buttonWrapper">
-                    <input type="button" value="Save" id="ctl_cfg_file_save">
+                    <input type="button" value="Save" id="ctl_cfg_file_save" (click)="cfg_file_save_handler()" >
                 </div>
             </div>
         </div>
@@ -63,7 +65,7 @@
         <div class="triggerSourceSettingsWrapper controlWrapper">
             <div class="input1">
                 <label for="ctl_trigger_source">Trigger Source:</label>
-                <select id="ctl_trigger_source">
+                <select id="ctl_trigger_source" (change)="trigger_handler()" [(ngModel)]="valueOf_ctl_trigger_source" >
                     <option>Internal</option>
                     <option>External (HW)</option>
                     <option>External (SW)</option>
@@ -72,13 +74,13 @@
 
             <div class="input2">
                 <label for="ctl_trigger_id">Ext. SW Trigger ID: </label>
-                <input type="number" id="ctl_trigger_id" name="ctl_trigger_id">
+                <input type="number" id="ctl_trigger_id" name="ctl_trigger_id" (change)="trigger_handler()" >
             </div>
         </div>
 
         <div class="displayModeWrapper controlWrapper">
             <label for="ctl_display_mode">Display Mode:</label>
-            <select id="ctl_display_mode"></select>
+            <select id="ctl_display_mode" (change)="display_mode_handler()" ></select>
         </div>
     </div><hr>
 

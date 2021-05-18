@@ -212,8 +212,14 @@ export interface Parameter {
 
 
   // cfg file list
-   cfg_file_current;   set_cfg_file_current(file) { this.cfg_file_current = file }
-   cfg_file_list;   set_cfg_file_list(list) { this.cfg_file_list = list }
+  cfg_file_current: string = '';
+  set_cfg_file_current(file) { this.cfg_file_current = file }
+
+   cfg_file_list: string[] = [];
+   set_cfg_file_list(list) {
+     this.cfg_file_list = list;
+     console.log('this is cfg_file_list : ' , this.cfg_file_list)
+   }
 
 
    display_mode_info_struct = this.struct(
@@ -517,7 +523,7 @@ export interface Parameter {
    rc_cmd_sent = -1;   set_rc_cmd_sent(k) { this.rc_cmd_sent = k }
 
 
-    cmd_short2rc_cmd (cmd_short) {
+    cmd_short2rc_cmd(cmd_short): number {
     let rc_cmd = this.rc_cmds.CMD_RC_UNKNOWN;
       this.cmds.forEach(key => (key.cmd_short == cmd_short) && (rc_cmd = key.rc_cmd))
     return rc_cmd;
@@ -577,15 +583,16 @@ export interface Parameter {
 
 
 
-  process_cmd (data_buffer) {
+  process_cmd (data_buffer) {  //TODO : this is an extremely long function. => break it down into lil ones.
     // convert command string into array of strings
-    let cmd_array = this.arraybuffer2string(data_buffer.slice(this.TYPE_HEADER_SIZE_BYTES)).split(this.RE_TOKEN_DELIMS);
+    let cmd_array: string[] = this.arraybuffer2string(data_buffer.slice(this.TYPE_HEADER_SIZE_BYTES)).split(this.RE_TOKEN_DELIMS);
+    // console.log('cmd_Array : ' , cmd_array);
 
     // remove empty last element if present
     if (cmd_array[cmd_array.length - 1] == "") cmd_array = cmd_array.slice(0, cmd_array.length - 1)
 
     // do we know this command?
-    let rc_cmd = this.cmd_short2rc_cmd(cmd_array[0]);
+    let rc_cmd: number = this.cmd_short2rc_cmd(cmd_array[0]);
     if (rc_cmd == this.rc_cmds.CMD_RC_UNKNOWN)
       rc_cmd = this.cmd_long2rc_cmd(cmd_array[0]);
     if (rc_cmd == this.rc_cmds.CMD_RC_CFG_UNKNOWN) {
@@ -596,7 +603,7 @@ export interface Parameter {
     // did we receive a response to a command we sent before?
     if (rc_cmd == this.rc_cmd_sent) this.rc_cmd_sent = -1;
 
-    let cfg_file:any ;
+    let cfg_file: string | string[];
 
     // process commands
     switch (rc_cmd) {
