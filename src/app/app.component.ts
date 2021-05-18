@@ -1,5 +1,5 @@
 import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component } from '@angular/core';
-import { MainService } from './main.service';
+import { MainService, Parameter } from './main.service';
 
 
 declare var $: any;
@@ -139,25 +139,29 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
    NO_LIMIT = 'U';
    FLOAT_FRACTION_DIGITS = 3;
 
-   check_parameter(parameter) {
-     console.log('check_parameter is called');
+   check_parameter(parameter: Parameter) {
+     let name = parameter.name;
+     let input_id = 'parameter_input_' + name;
 
-    let name = parameter.name;
-    let input_id = 'parameter_input_' + name;
+     let currentElement = document.getElementById(input_id) as HTMLSelectElement;
 
-    let value_old = parameter.current_value;
+     let value_new = currentElement.value; //this is a string
+     let value_old = parameter.current_value;
 
-    let value: number | string;
-    let min;
-    let max;
+     console.log('value_new = currentElement.value : ' , value_new)
+     console.log('value_old = parameter.current_value : ' , value_old)
 
-    switch (parameter.type) {
+     let value: number | string;
+     let min;
+     let max;
+
+     switch (parameter.type) {
       case "L": // list: correct by design
         break;
 
       case "I":
         // int: auto correct values if limits exceeded
-        value = parseInt($("#" + input_id).val() as string);
+        value = parseInt(value_new);
         if (isNaN(value)) { value = 0; $("#" + input_id).val(value) }
         min = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0];
         max = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1];
@@ -167,14 +171,14 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
       case "F":
         // float: auto correct values if limits exceeded
-        value = parseFloat($("#" + input_id).val() as string);
+        value = parseFloat(value_new as string);
         if (isNaN(value)) value = 0;
         min = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[0];
         max = parameter.allowed_values.split(this.mainService.RE_TOKEN_DELIMS)[1];
         if (min != this.NO_LIMIT && value < parseFloat(min)) {  $("#" + input_id).val(parseFloat(min)) }
         if (max != this.NO_LIMIT && value > parseFloat(max)) {  $("#" + input_id).val(parseFloat(max)) }
         // show float values in exponential number format
-        $("#" + input_id).val(parseFloat($("#" + input_id).val() as string).toExponential(this.FLOAT_FRACTION_DIGITS));
+        $("#" + input_id).val(parseFloat(value_new as string).toExponential(this.FLOAT_FRACTION_DIGITS));
         break;
 
       default:
@@ -182,16 +186,16 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
     }
 
     // request update of cfg parameter value only if parameter value changed
-    value = $("#" + input_id).val() as number;
-    if (value_old != value) {
+    value = value_new;
+    if (value_old !== value) {
       this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_CFG_VALUE, name, value);
-      // cfg_file_current = ''; // clear name of currently loaded cfg file if a parameter value has changed
       this.mainService.set_cfg_file_current(''); // clear name of currently loaded cfg file if a parameter value has changed
       this.valueOf_ctl_cfg_file_load_name = '';
     }
 
     // store new parameter value
-     parameter.current_value = $("#" + input_id).val();
+    //  parameter.current_value = $("#" + input_id).val();
+     currentElement.value = value_new;
   }
 
    update_parameters() {

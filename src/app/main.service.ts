@@ -217,7 +217,7 @@ export interface Parameter {
    cfg_file_list: string[] = [];
    set_cfg_file_list(list) {
      this.cfg_file_list = list;
-     console.log('this is cfg_file_list : ' , this.cfg_file_list)
+     // console.log('this is cfg_file_list : ' , this.cfg_file_list)
    }
 
 
@@ -761,7 +761,7 @@ export interface Parameter {
           // display_node_index_list = [];
           this.set_display_node_index_list([]);
 
-          console.log('display_mode_info : ' , this.display_mode_info);
+          // console.log('display_mode_info : ' , this.display_mode_info);
 
           for (let i in this.display_mode_info) {
             // if display mode in nodes names
@@ -836,6 +836,9 @@ export interface Parameter {
       default:
         break;
     }
+
+
+    // console.log('this.cfg_parameter_value : ' , this.cfg_parameter_value);
 
   } //process_cmd()
 
