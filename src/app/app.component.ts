@@ -130,7 +130,8 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
    valueOf_ctl_nruns: number = 0;
    valueOf_ctl_trigger_source: string;
    valueOf_ctl_display_mode: any;
-
+   valueOf_ctl_trigger_id: any;
+   valueOf_ctl_cfg_file_save_name: any;
 
 
   // @ts-nocheck
@@ -141,12 +142,9 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
    check_parameter(parameter) {
      console.log('check_parameter is called');
 
-     // let i = this.mainService.cfg_parameter_value.findIndex(element => "parameter_input_" + element.name == parameter.id);
-    // let name = this.mainService.cfg_parameter_value[i].name;
     let name = parameter.name;
     let input_id = 'parameter_input_' + name;
 
-    // let value_old = this.mainService.cfg_parameter_value[i].current_value;
     let value_old = parameter.current_value;
 
     let value: number | string;
@@ -189,7 +187,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
       this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_CFG_VALUE, name, value);
       // cfg_file_current = ''; // clear name of currently loaded cfg file if a parameter value has changed
       this.mainService.set_cfg_file_current(''); // clear name of currently loaded cfg file if a parameter value has changed
-      // $("#ctl_cfg_file_load_name").val("");
       this.valueOf_ctl_cfg_file_load_name = '';
     }
 
@@ -312,7 +309,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
         break;
 
       case this.mainService.rc_states.RC_STATE_HALT:
-        // this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_RUN_GO, $('#ctl_nruns').val(), this.mainService.trigger_id);
         this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_RUN_GO, this.valueOf_ctl_nruns, this.mainService.trigger_id);
         break;
 
@@ -333,12 +329,10 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   }
 
    nruns_handler() {
-     // this.mainService.ctl_nruns = $('#ctl_nruns').val();
      this.mainService.ctl_nruns = this.valueOf_ctl_nruns;
   }
 
    cfg_file_load_handler() {
-     // this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_CFG_LOAD, $("#ctl_cfg_file_load_name").val());
      this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_CFG_LOAD, this.valueOf_ctl_cfg_file_load_name);
     // clear cfg file name; name will be set in response
     // $("#ctl_cfg_file_load_name").val("");
@@ -346,16 +340,14 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   }
 
    cfg_file_save_handler() {
-    if ($('#ctl_cfg_file_save_name').val() != '') {
+    if (this.valueOf_ctl_cfg_file_save_name !== '') {
       // ignore path, use filename only
 
-      let temp:any = $('#ctl_cfg_file_save_name').val();
+      let temp:any = this.valueOf_ctl_cfg_file_save_name;
       let path_elements = temp.split(/[\\\/]+/);
-      // let path_elements = $('#ctl_cfg_file_save_name').val().split(/[\\\/]+/);
-
 
       this.mainService.send_cmd(this.mainService.rc_cmds.CMD_RC_CFG_SAVE, path_elements[path_elements.length - 1]);
-      $("#ctl_cfg_file_save_name").val(''); // clear cfg file name
+      this.valueOf_ctl_cfg_file_save_name = ''; // clear cfg file name
     }
   }
 
@@ -364,9 +356,8 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
     $('#parameter_input_timer_period_ms').attr('disabled', 'disabled');
     $('#ctl_trigger_id').attr('disabled', 'disabled');
     $('#ctl_trigger_id').attr('min', this.trigger_id_external_hw + 1);
-    $('#ctl_trigger_id').val(this.trigger_id_external_hw + 1);
+    this.valueOf_ctl_trigger_id = this.trigger_id_external_hw + 1;
 
-    // switch ($('#ctl_trigger_source').val()) {
     switch (this.valueOf_ctl_trigger_source) {
       case "Internal":
         this.mainService.trigger_id = this.trigger_id_internal;
@@ -378,7 +369,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
         break;
 
       case "External (SW)":
-        this.mainService.trigger_id = $('#ctl_trigger_id').val();
+        this.mainService.trigger_id = this.valueOf_ctl_trigger_id;
         $('#ctl_trigger_id').removeAttr('disabled');
         $('#ctl_trigger_id').attr('min', this.trigger_id_external_hw + 1);
         break;
@@ -389,7 +380,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    display_mode_handler() {
      console.log('display_mode_handler is called')
-    // this.display_mode = $("#ctl_display_mode").val();
     this.display_mode = this.valueOf_ctl_display_mode;
 
     if (this.display_mode == this.display_mode_combined) {
@@ -417,25 +407,18 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
         break;
 
       case this.trigger_id_internal:
-        // $('#ctl_trigger_source').val("Internal");
         this.valueOf_ctl_trigger_source = "Internal";
-        // this.cdr.detectChanges();
         break;
 
       case this.trigger_id_external_hw:
-        // $('#ctl_trigger_source').val("External (HW)");
         this.valueOf_ctl_trigger_source = "External (HW)";
-
         break;
 
       default:
         // external SW
-        // $('#ctl_trigger_source').val("External (SW)");
         this.valueOf_ctl_trigger_source = "External (SW)";
-
-
         $('#ctl_trigger_id').removeAttr('disabled');
-        $('#ctl_trigger_id').val(this.mainService.trigger_id);
+        this.valueOf_ctl_trigger_id = this.mainService.trigger_id;
     }
   }
 
@@ -447,8 +430,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
     //                                       // <option>" + this.mainService.cfg_file_list[index] + "</option>
     //   $("#ctl_cfg_file_load_name").append("<option>" + this.mainService.cfg_file_list[index] + "</option>");
     // }
-
-    // $("#ctl_cfg_file_load_name").val(this.mainService.cfg_file_current);  // set previously stored cfg file
      this.valueOf_ctl_cfg_file_load_name = this.mainService.cfg_file_current;
   }
 
@@ -463,7 +444,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
       if (this.mainService.cfg_parameter_value.find(n => n.name === "pipeline_type")
         .current_value == this.mainService.display_mode_info.find(n => n.mode === this.mainService.display_mode_list[index]).match_to_pipeline)
       {
-        // $("#ctl_display_mode").val(this.mainService.display_mode_list[index]);
         this.valueOf_ctl_display_mode = this.mainService.display_mode_list[index];
         this.display_mode = this.mainService.display_mode_list[index];
         this.mainService.node_index_required = this.mainService.display_node_index_list[index];
@@ -537,27 +517,23 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
      this.mainService.cfg_file_current = '';
      this.mainService.cfg_file_list = [];
 
-     // $('#ctl_cfg_file_load_name').val(this.mainService.cfg_file_current);
      this.valueOf_ctl_cfg_file_load_name = this.mainService.cfg_file_current;
 
-     // $('#ctl_nruns').val(this.ctl_nruns_default);
      this.valueOf_ctl_nruns =  this.ctl_nruns_default;
 
      this.mainService.rc_state = this.mainService.rc_states.RC_STATE_UNDEFINED;
      this.mainService.set_rc_cmd_sent(-1)
      this.mainService.trigger_id = this.trigger_id_internal;
 
-     // $('#ctl_trigger_source').val('Internal');
      this.valueOf_ctl_trigger_source =  'Internal';
 
      $('#ctl_trigger_id').attr('min', this.trigger_id_external_hw + 1);
-     $('#ctl_trigger_id').val(this.trigger_id_external_hw + 1);
+     this.valueOf_ctl_trigger_id = this.trigger_id_external_hw + 1;
 
      this.mainService.display_mode_list = [];
      this.mainService.display_node_index_list = [];
      this.display_mode = '';
 
-     // $('#ctl_display_mode').val(this.display_mode);
      this.valueOf_ctl_display_mode = this.display_mode;
 
      this.mainService.node_index_required = -1;
