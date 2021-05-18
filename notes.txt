@@ -1,0 +1,1 @@
+I click 'start' . the Radar sends data. but my front end is buggy. so the board crushes and start blinking, and I stop being able to connect to it with ssh. => I I HAVE to unplug the strom

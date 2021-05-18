@@ -17,8 +17,8 @@ export class AppComponent implements AfterViewInit {
 
   constructor(
     private cdr: ChangeDetectorRef,
-    public mainService: MainService) {
-  }
+    public mainService: MainService
+  ) {}
 
   ngAfterViewInit(): void {
     this.main();
@@ -64,12 +64,12 @@ export class AppComponent implements AfterViewInit {
 
         switch (type_header.tag) {
           case this.mainService.HEADER_TAG_PIPELINE:
-            console.log('we just got HEADER_TAG_PIPELINE');
+            // console.log('we just got HEADER_TAG_PIPELINE');
             this.mainService.process_pipeline_headers(msg.data);
             break;
 
           case this.mainService.HEADER_TAG_DATA:
-            console.log('we just got HEADER_TAG_DATA');
+            // console.log('we just got HEADER_TAG_DATA');
             this.process_graphics_data(msg.data);
             break;
 
@@ -90,23 +90,9 @@ export class AppComponent implements AfterViewInit {
         this.mainService.set_ws_state(this.mainService.ws_states.WS_STATE_DISCONNECTED)
         console.log("ws close");
       };
-
     }
     catch(exception) { alert("<p>Error " + exception) }
 
-    // register event handlers
-    // window resize
-    $(window).bind('resize', () => { //TODO : fix this
-      if ($("input").is(":focus")) {
-        // save id of input field focused during resize and restore focus after update
-        // to keep virtual keyboard active on mobile devices
-        let id = $(":focus").attr("id");
-        this.update_window();
-        $("#" + id).focus();
-      } else {
-        this.update_window();
-      }
-    });
 
     // Runs/RUN/STOP/QUIT
     $('#ctl_nruns').change(this.nruns_handler);
@@ -193,8 +179,8 @@ export class AppComponent implements AfterViewInit {
   }
 
    update_parameters() {
-     console.log('update_parameters is called');
-     console.log('this is param_value : ' , this.mainService.cfg_parameter_value);
+     // console.log('update_parameters is called');
+     // console.log('this is param_value : ' , this.mainService.cfg_parameter_value);
 
     //
     //  // remove old cfg parameter labels and inputs
@@ -297,7 +283,7 @@ export class AppComponent implements AfterViewInit {
      console.log('run_stop_handler ii called')
     $("#ctl_run").attr("disabled", "disabled");
 
-    console.log('this is rc_state : ' , this.mainService.rc_state);
+    // console.log('this is rc_state : ' , this.mainService.rc_state);
 
     switch (this.mainService.rc_state) {
       case this.mainService.rc_states.RC_STATE_UNDEFINED:
@@ -526,7 +512,7 @@ export class AppComponent implements AfterViewInit {
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§  graphics  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
 
-   nodes_headers;
+   // nodes_headers;
 
     // default values
 
@@ -997,7 +983,12 @@ export class AppComponent implements AfterViewInit {
 
     // map received data to RGBA values
     // use the highest byte only
-    switch (this.nodes_headers[node_index].bitwidth) {
+    //  console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4');
+    //  console.log('this is nodes_headers :  ' , this.mainService.nodes_headers)
+    //  console.log('this is node_index :  ' , node_index)
+    //  console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4');
+
+     switch (this.mainService.nodes_headers[node_index].bitwidth) {
       case 8:
         data = new Uint8Array(data_buffer.slice(this.mainService.TYPE_HEADER_SIZE_BYTES));
         rgba_buf32 = Uint32Array.from(data).map(e => this.scaled_rgbatable[e]);
@@ -1014,7 +1005,7 @@ export class AppComponent implements AfterViewInit {
         break;
 
       default:
-        alert("ERROR: Wrong bitwidth (" + this.nodes_headers[node_index].data_bitwidth + ") received");
+        alert("ERROR: Wrong bitwidth (" + this.mainService.nodes_headers[node_index].data_bitwidth + ") received");
         return;
     }
 
@@ -1111,7 +1102,7 @@ export class AppComponent implements AfterViewInit {
 
      this.mainService.nodes_names = [];
      this.mainService.nodes_omodes = [];
-     this.nodes_headers = [];
+     this.mainService.nodes_headers = [];
 
      this.mainService.scale_legend_x = '';
      this.mainService.scale_legend_y = '';
