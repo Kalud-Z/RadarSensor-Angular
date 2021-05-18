@@ -8,7 +8,6 @@ export interface Parameter {
   text: string | any,
   type: string | any,
   allowed_values: string | any
-
 }
 
 
@@ -229,13 +228,13 @@ export interface Parameter {
    );
 
 
-   display_mode_info = [
+   display_mode_info: any[] = [
       this.display_mode_info_struct('R/D Map',	'FFT2ABSLOG', 'RDMAP'),
       this.display_mode_info_struct('CFAR',	'CFAR'		, 'CFAR')
   ];
 
 
-   display_mode_list;  set_display_mode_list(k) { this.display_mode_list = k }
+   display_mode_list: string[];  set_display_mode_list(k: string[]) { this.display_mode_list = k; }
    display_node_index_list;   set_display_node_index_list(k) { this.display_node_index_list = k }
 
    node_index_required: any
@@ -756,11 +755,13 @@ export interface Parameter {
           }
 
           // generate display mode list from nodes names and nodes output modes
-          // display_mode_list = [];  //TODO : it is though a VAR in some other file. is this gonna cause also a run-time error ?
+          // display_mode_list = [];
           this.set_display_mode_list([]);
 
           // display_node_index_list = [];
           this.set_display_node_index_list([]);
+
+          console.log('display_mode_info : ' , this.display_mode_info);
 
           for (let i in this.display_mode_info) {
             // if display mode in nodes names

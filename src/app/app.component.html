@@ -78,11 +78,16 @@
             </div>
         </div>
 
+
         <div class="displayModeWrapper controlWrapper">
-            <label for="ctl_display_mode">Display Mode:</label>
-            <select id="ctl_display_mode" (change)="display_mode_handler()" ></select>
+            <label for="ctl_display_mode"> Display Mode: </label>
+            <select id="ctl_display_mode" (change)="display_mode_handler()" [(ngModel)]="valueOf_ctl_display_mode" >
+                <option *ngFor="let item of this.mainService.display_mode_list"> {{ item }} </option>
+                <option *ngIf="this.mainService.display_mode_list?.length > 1"> {{ this.display_mode_combined }} </option>
+            </select>
         </div>
     </div><hr>
+
 
     <div id="grid_parameters_container" class="box"> <!-- this element being handled by rc_cfg_parameters -->
         <div *ngFor="let param of this.mainService.cfg_parameter_value"  [id]="['parameter_' + param.name]" class="paramWrapper">

@@ -127,10 +127,10 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§ config_params  §§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
   //§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§§
    valueOf_ctl_cfg_file_load_name: string = '';
-
    valueOf_ctl_nruns: number = 0;
-
    valueOf_ctl_trigger_source: string;
+   valueOf_ctl_display_mode: any;
+
 
 
   // @ts-nocheck
@@ -388,7 +388,9 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   }
 
    display_mode_handler() {
-    this.display_mode = $("#ctl_display_mode").val();
+     console.log('display_mode_handler is called')
+    // this.display_mode = $("#ctl_display_mode").val();
+    this.display_mode = this.valueOf_ctl_display_mode;
 
     if (this.display_mode == this.display_mode_combined) {
       this.mainService.node_index_required = this.mainService.display_node_index_list[0]; // select first node in combined display mode
@@ -452,23 +454,28 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
     // update display mode list
    update_display_mode_list() {  // TODO : move this to the template
-    $("#ctl_display_mode option").remove();  // remove old display modes
+
+    // $("#ctl_display_mode option").remove();  // remove old display modes
     for (let index in this.mainService.display_mode_list) { // append display modes to listbox
-      $("#ctl_display_mode").append("<option>" + this.mainService.display_mode_list[index] + "</option>");
+      // $("#ctl_display_mode").append("<option>" + this.mainService.display_mode_list[index] + "</option>");
 
       // select display mode if it fits the current pipeline
-      if (this.mainService.cfg_parameter_value.find(n => n.name == "pipeline_type").current_value == this.mainService.display_mode_info
-        .find(n => n.mode == this.mainService.display_mode_list[index]).match_to_pipeline) {
-        $("#ctl_display_mode").val(this.mainService.display_mode_list[index]);
+      if (this.mainService.cfg_parameter_value.find(n => n.name === "pipeline_type")
+        .current_value == this.mainService.display_mode_info.find(n => n.mode === this.mainService.display_mode_list[index]).match_to_pipeline)
+      {
+        // $("#ctl_display_mode").val(this.mainService.display_mode_list[index]);
+        this.valueOf_ctl_display_mode = this.mainService.display_mode_list[index];
         this.display_mode = this.mainService.display_mode_list[index];
         this.mainService.node_index_required = this.mainService.display_node_index_list[index];
       }
+
+
     }
 
     // add "Combined" option, if more than one display mode available
-    if (this.mainService.display_mode_list.length > 1) {
-      $("#ctl_display_mode").append("<option>" + this.display_mode_combined + "</option>");
-    }
+    // if (this.mainService.display_mode_list.length > 1) {
+    //   $("#ctl_display_mode").append("<option>" + this.display_mode_combined + "</option>");
+    // }
   }
 
    update_controls() {
@@ -542,7 +549,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
      // $('#ctl_trigger_source').val('Internal');
      this.valueOf_ctl_trigger_source =  'Internal';
-     this.runChangeDetection();
 
      $('#ctl_trigger_id').attr('min', this.trigger_id_external_hw + 1);
      $('#ctl_trigger_id').val(this.trigger_id_external_hw + 1);
@@ -550,10 +556,15 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
      this.mainService.display_mode_list = [];
      this.mainService.display_node_index_list = [];
      this.display_mode = '';
-     $('#ctl_display_mode').val(this.display_mode);
+
+     // $('#ctl_display_mode').val(this.display_mode);
+     this.valueOf_ctl_display_mode = this.display_mode;
+
      this.mainService.node_index_required = -1;
 
      this.mainService.status_clearall(this.mainService.controls_states);
+
+     this.runChangeDetection();
   }
 
 
