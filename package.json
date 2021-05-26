@@ -23,6 +23,9 @@
     "@types/jqueryui": "^1.12.15",
     "jquery": "^3.6.0",
     "jquery-ui-dist": "^1.12.1",
+    "nouislider": "^15.1.1",
+    "primeicons": "^4.1.0",
+    "primeng": "^12.0.0-rc.1",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",
     "zone.js": "~0.10.2"

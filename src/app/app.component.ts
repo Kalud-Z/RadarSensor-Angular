@@ -855,10 +855,13 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
      let id_elements = ["#colorbar_blue", "#colorbar_cyan2blue", "#colorbar_green2cyan", "#colorbar_yellow2green",
                         "#colorbar_red2yellow", "#colorbar_red"];
-    let id_slider = "#colorbar_slider"
+     let id_slider = "#colorbar_slider"
 
     // read values from slider, sort values and write them back to slider
     let values = $(id_slider).slider("option", "values").sort((a,b) => { return a - b });
+
+    console.log('$(id_slider).slider("option", "values") : ' , $(id_slider).slider("option", "values"));
+
     console.log('values : ' , values);
      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
@@ -887,7 +890,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
 
     let rgbatable = new Uint32Array(256);
-    for (let i = 0;i <= cb_blue_level;i++) {
+    for (let i = 0; i <= cb_blue_level; i++) {
       rgbatable[i] = 0xFFFF0000;
     }
     for (let i = cb_blue_level;i <= cb_cyan_level;i++) {
@@ -918,7 +921,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
       else if (i > this.COLORBAR_SCALE_MAX) { this.scaled_rgbatable[i] = 0xFF000080 }
       else { this.scaled_rgbatable[i] = rgbatable[(scale * (i + offset)) | 0] }
     }
-
   }
 
 
@@ -1043,11 +1045,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
     // map received data to RGBA values
     // use the highest byte only
-    //  console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4');
-    //  console.log('this is nodes_headers :  ' , this.mainService.nodes_headers)
-    //  console.log('this is node_index :  ' , node_index)
-    //  console.log('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$4');
-
      switch (this.mainService.nodes_headers[node_index].bitwidth) {
       case 8:
         data = new Uint8Array(data_buffer.slice(this.mainService.TYPE_HEADER_SIZE_BYTES));
@@ -1192,9 +1189,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
       values: this.COLORBAR_SLIDER_DEFAULT_VALUES,
       min: 0,
       max: 255,
-      slide: function() {
-        this.mainService.adjust_colorbar();
-      }
+      slide: () => this.adjust_colorbar()
     });
 
      this.image_scale_canvas = document.getElementById('image_scale_canvas');
