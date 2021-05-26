@@ -656,8 +656,6 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    draw_scale(id_canvas, scale_pos_x, scale_pos_y, scale_size, ticklength, decimal_places, orientation,
               divs_between_long_ticks, fillstyle, font, fontsize, world_start, world_stop, bins, legend) {
-     console.log('draw_scale is called');
-     console.log('this is legend :' , legend);
 
      let element: any = document.getElementById(id_canvas);
     if (element.getContext) {
@@ -853,7 +851,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    // adjust colorbar according to current window dimensions
    adjust_colorbar() {
-     // console.log('adjust_colorbar is called');
+     console.log('adjust_colorbar is called');
 
      let id_elements = ["#colorbar_blue", "#colorbar_cyan2blue", "#colorbar_green2cyan", "#colorbar_yellow2green",
                         "#colorbar_red2yellow", "#colorbar_red"];
@@ -861,7 +859,12 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
     // read values from slider, sort values and write them back to slider
     let values = $(id_slider).slider("option", "values").sort((a,b) => { return a - b });
-    $(id_slider).slider({"values": values});
+    console.log('values : ' , values);
+     console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+     console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+     console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+
+     $(id_slider).slider({ "values": values });
 
     // adjust heights of colorbar ranges according to slider values
     for (let i = 0; i <= values.length; i++) {

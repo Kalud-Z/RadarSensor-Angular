@@ -452,8 +452,6 @@ export interface Parameter {
       (this.scale_world_range_y !== this.nodes_headers[this.node_index_required].world_range_y)
     );
 
-    console.log('this is scale_parameters_changed : ' , scale_parameters_changed)
-      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
 
       if (scale_parameters_changed) {
       this.set_scale_legend_x(this.nodes_headers[this.node_index_required].label_x);
