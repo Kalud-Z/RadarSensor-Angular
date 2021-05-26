@@ -140,8 +140,8 @@ export interface Parameter {
 
 
     // scales
-   scale_legend_x;        set_scale_legend_x(k) { this.scale_legend_x = k }
-   scale_legend_y;        set_scale_legend_y(k) { this.scale_legend_x = k }
+   scale_legend_x: string;      set_scale_legend_x(k) { this.scale_legend_x = k }
+   scale_legend_y: string;      set_scale_legend_y(k) { this.scale_legend_y = k }
    scale_world_start_x;   set_scale_world_start_x(k) { this.scale_world_start_x = k }
    scale_world_start_y;   set_scale_world_start_y(k) { this.scale_world_start_y = k }
    scale_world_range_x;   set_scale_world_range_x(k) { this.scale_world_range_x = k }
@@ -342,14 +342,13 @@ export interface Parameter {
     );
   }
 
-    process_pipeline_headers(data_buffer) {
+
+    process_pipeline_headers(data_buffer) { //TODO : this one is NOT supposed to be called with each new image.
     let number_of_nodes = this.arraybuffer2type_header(data_buffer.slice(0, this.TYPE_HEADER_SIZE_BYTES)).value;
     this.nodes_headers = []; // TODO : this wouldn't work. you need initialize all indexes with 0 at first, then change them.
 
-      for (let i = 0; i < number_of_nodes; i++) {
-      // nodes_headers[i] = this.arraybuffer2node_header(data_buffer, i);
-      this.nodes_headers.push(this.arraybuffer2node_header(data_buffer, i))
-      // 		print_header(nodes_headers[i], i);
+    for (let i = 0; i < number_of_nodes; i++) {
+      this.nodes_headers[i] = this.arraybuffer2node_header(data_buffer, i);
     }
 
     // cfg_parameters and controls must be fully configured before
@@ -382,6 +381,7 @@ export interface Parameter {
 
     // no nodes to be displayed -> setup graphics with default values
     if (this.node_index_required < 0) {
+      console.log('inside process_pipelines_headers() . inside this.node_index_required < 0 . setting scale_legend_x to (range) ')
       this.set_scale_legend_x('range');
       this.set_scale_legend_y('velocity');
       this.set_data_datatype('U');
@@ -400,32 +400,62 @@ export interface Parameter {
       this.set_res_y(0);
       this.status_set(this.graphics_states, 'GRAPHICS_STATE_SCALES');
 
-      // update_graphics(); //subject
       this.update_graphics$.next(true);
-
 
       return;
     }
 
-    // take the new scales parameters if parameters changed
+
+    // console.log('this is nodes_headers : ' , this.nodes_headers);
+    // console.log('this is this.node_index_required : ' , this.node_index_required);
+    // console.log('#####################################################################');
+
+    // console.log('scale_legend_x :  ' , this.scale_legend_x !== this.nodes_headers[this.node_index_required].label_x);
+    // console.log('scale_legend_y :  ' , this.scale_legend_y != this.nodes_headers[this.node_index_required].label_y);
+    //
+    // console.log('scale_legend_x :  ' , this.scale_legend_x);
+    // console.log('scale_legend_y :  ' , this.scale_legend_y);
+
+    // console.log('data_datatype :  ' ,this.data_datatype != this.nodes_headers[this.node_index_required].datatype)
+    // console.log('data_bitwidth :  ' ,this.data_bitwidth != this.nodes_headers[this.node_index_required].bitwidth)
+    // console.log('data_image_size_x :  ' ,this.data_image_size_x != this.nodes_headers[this.node_index_required].image_size_x)
+    // console.log('data_image_size_y :  ' ,this.data_image_size_y != this.nodes_headers[this.node_index_required].image_size_y)
+    // console.log('data_image_start_x :  ' ,this.data_image_start_x != this.nodes_headers[this.node_index_required].image_start_x)
+    // console.log('data_image_start_y :  ' ,this.data_image_start_y != this.nodes_headers[this.node_index_required].image_start_y)
+    // console.log('data_image_range_x :  ' ,this.data_image_range_x != this.nodes_headers[this.node_index_required].image_range_x)
+    // console.log('data_image_range_y :  ' ,this.data_image_range_y != this.nodes_headers[this.node_index_required].image_range_y)
+    // console.log('scale_world_start_x :  ' ,this.scale_world_start_x != this.nodes_headers[this.node_index_required].world_start_x)
+    // console.log('scale_world_start_y :  ' ,this.scale_world_start_y != this.nodes_headers[this.node_index_required].world_start_y)
+    // console.log('scale_world_range_x :  ' ,this.scale_world_range_x != this.nodes_headers[this.node_index_required].world_range_x)
+    // console.log('scale_world_range_y :  ' ,this.scale_world_range_y != this.nodes_headers[this.node_index_required].world_range_y)
+
+      console.log('#####################################################################');
+      console.log('#####################################################################');
+      console.log('#####################################################################');
+
+
+      // take the new scales parameters if parameters changed
     let scale_parameters_changed = (
-      (this.scale_legend_x != this.nodes_headers[this.node_index_required].label_x) ||
-      (this.scale_legend_y != this.nodes_headers[this.node_index_required].label_y) ||
-      (this.data_datatype != this.nodes_headers[this.node_index_required].datatype) ||
-      (this.data_bitwidth != this.nodes_headers[this.node_index_required].bitwidth) ||
-      (this.data_image_size_x != this.nodes_headers[this.node_index_required].image_size_x) ||
-      (this.data_image_size_y != this.nodes_headers[this.node_index_required].image_size_y) ||
-      (this.data_image_start_x != this.nodes_headers[this.node_index_required].image_start_x) ||
-      (this.data_image_start_y != this.nodes_headers[this.node_index_required].image_start_y) ||
-      (this.data_image_range_x != this.nodes_headers[this.node_index_required].image_range_x) ||
-      (this.data_image_range_y != this.nodes_headers[this.node_index_required].image_range_y) ||
-      (this.scale_world_start_x != this.nodes_headers[this.node_index_required].world_start_x) ||
-      (this.scale_world_start_y != this.nodes_headers[this.node_index_required].world_start_y) ||
-      (this.scale_world_range_x != this.nodes_headers[this.node_index_required].world_range_x) ||
-      (this.scale_world_range_y != this.nodes_headers[this.node_index_required].world_range_y)
+      (this.scale_legend_x !== this.nodes_headers[this.node_index_required].label_x) ||
+      (this.scale_legend_y !== this.nodes_headers[this.node_index_required].label_y) ||
+      (this.data_datatype !== this.nodes_headers[this.node_index_required].datatype) ||
+      (this.data_bitwidth !== this.nodes_headers[this.node_index_required].bitwidth) ||
+      (this.data_image_size_x !== this.nodes_headers[this.node_index_required].image_size_x) ||
+      (this.data_image_size_y !== this.nodes_headers[this.node_index_required].image_size_y) ||
+      (this.data_image_start_x !== this.nodes_headers[this.node_index_required].image_start_x) ||
+      (this.data_image_start_y !== this.nodes_headers[this.node_index_required].image_start_y) ||
+      (this.data_image_range_x !== this.nodes_headers[this.node_index_required].image_range_x) ||
+      (this.data_image_range_y !== this.nodes_headers[this.node_index_required].image_range_y) ||
+      (this.scale_world_start_x !== this.nodes_headers[this.node_index_required].world_start_x) ||
+      (this.scale_world_start_y !== this.nodes_headers[this.node_index_required].world_start_y) ||
+      (this.scale_world_range_x !== this.nodes_headers[this.node_index_required].world_range_x) ||
+      (this.scale_world_range_y !== this.nodes_headers[this.node_index_required].world_range_y)
     );
 
-    if (scale_parameters_changed) {
+    console.log('this is scale_parameters_changed : ' , scale_parameters_changed)
+      console.log('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%');
+
+      if (scale_parameters_changed) {
       this.set_scale_legend_x(this.nodes_headers[this.node_index_required].label_x);
       this.set_scale_legend_y(this.nodes_headers[this.node_index_required].label_y);
       this.set_data_datatype(this.nodes_headers[this.node_index_required].datatype);
@@ -443,8 +473,9 @@ export interface Parameter {
       this.set_res_x(this.scale_world_range_x / (this.data_image_range_x - 1));
       this.set_res_y(this.scale_world_range_y / (this.data_image_range_y - 1));
       this.status_set(this.graphics_states, 'GRAPHICS_STATE_SCALES');
-      // update_graphics(); //subject
-      this.update_graphics$.next(true);
+
+      this.update_graphics$.next(true); //TODO : this is one is being called with each new image. while it shouldnt !
+
     }
   }
 
@@ -788,7 +819,6 @@ export interface Parameter {
           // update graphics configuration state
           this.status_set(this.graphics_states, 'GRAPHICS_STATE_NODES_OMODES');
 
-          // update_graphics();
           this.update_graphics$.next(true)
         }
         break;

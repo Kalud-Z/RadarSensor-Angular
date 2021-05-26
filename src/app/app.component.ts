@@ -36,7 +36,13 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   initSubjects() {
     this.mainService.init_controls$.subscribe(data => { if(data) this.init_controls() });
     this.mainService.init_graphics$.subscribe(data => { if(data) this.init_graphics() });
-    this.mainService.update_graphics$.subscribe(data => { if(data) this.update_graphics() });
+
+    this.mainService.update_graphics$.subscribe(data => { if(data) {
+      // console.log('subject of update_graphics$ got data.')
+      this.update_graphics();
+    } });
+
+
     this.mainService.set_data_invalid_marker$.subscribe(data => { if(data) this.set_data_invalid_marker() });
     this.mainService.update_parameters$.subscribe(data => { if(data) this.update_parameters() });
     this.mainService.update_cfg_file_list$.subscribe(data => { if(data) this.update_cfg_file_list() });
@@ -72,12 +78,12 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
         switch (type_header.tag) {
           case this.mainService.HEADER_TAG_PIPELINE:
-            // console.log('we just got HEADER_TAG_PIPELINE');
+            // console.log('we just got HEADER_TAG_PIPELINE and about to call process_pipeline_headers() ');
             this.mainService.process_pipeline_headers(msg.data);
             break;
 
           case this.mainService.HEADER_TAG_DATA:
-            // console.log('we just got HEADER_TAG_DATA');
+            // console.log('we just got HEADER_TAG_DATA and about to call process_graphics_data() ');
             this.process_graphics_data(msg.data);
             break;
 
@@ -400,7 +406,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
     // update trigger controls
    update_trigger() {
-     console.log('update trigger is called');
+     // console.log('update trigger is called');
 
     $('#ctl_trigger_source').removeAttr('disabled');
     $('#ctl_trigger_id').attr('disabled', 'disabled');
@@ -516,7 +522,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   }
 
    init_controls() {
-     console.log('init_controls() is called')
+     // console.log('init_controls() is called')
 
      this.mainService.cfg_file_current = '';
      this.mainService.cfg_file_list = [];
@@ -650,7 +656,10 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    draw_scale(id_canvas, scale_pos_x, scale_pos_y, scale_size, ticklength, decimal_places, orientation,
               divs_between_long_ticks, fillstyle, font, fontsize, world_start, world_stop, bins, legend) {
-    let element: any = document.getElementById(id_canvas);
+     console.log('draw_scale is called');
+     console.log('this is legend :' , legend);
+
+     let element: any = document.getElementById(id_canvas);
     if (element.getContext) {
       let ctx = element.getContext('2d');
 
@@ -660,8 +669,8 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
       let size_per_bin = scale_size / bins;
       let image2world_ratio = size_per_bin * (bins - 1) / (world_stop - world_start);
-      let max_scale_value_scale_size = Math.max(this.getWidthOfText(world_start.toFixed(this.SCALE_DECIMAL_PLACES).toString(),
-        this.SCALE_FONT, this.SCALE_FONTSIZE), this.getWidthOfText(world_stop.toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE));
+      let max_scale_value_scale_size = Math.max(this.getWidthOfText(world_start.toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT,
+        this.SCALE_FONTSIZE), this.getWidthOfText(world_stop.toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE));
 
       let scale_start_x;
       let scale_start_y;
@@ -810,9 +819,13 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    // draw rdmap scales
    draw_scales_rdmap() {
-    // clear image scale canvas
+     // console.log('draw_scales_rdmap is called');
+
+
+     // clear image scale canvas
     this.image_scale_canvas_ctx.clearRect(0, 0, this.image_scale_canvas.width, this.image_scale_canvas.height);
 
+    console.log('we about tocall draw_scale() , this is scale_legend_x : ' , this.mainService.scale_legend_x);
     // x axis
      this.draw_scale("image_scale_canvas", this.image_data_offset_x, this.image_data_offset_y + this.image_data_size_y, this.image_data_size_x,
        this.SCALE_TICKLENGTH, this.SCALE_DECIMAL_PLACES, "horizontal", this.SCALE_DIVS_BETWEEN_LONG_TICKS, this.SCALE_FILLSTYLE,
@@ -840,7 +853,9 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    // adjust colorbar according to current window dimensions
    adjust_colorbar() {
-    let id_elements = ["#colorbar_blue", "#colorbar_cyan2blue", "#colorbar_green2cyan", "#colorbar_yellow2green",
+     // console.log('adjust_colorbar is called');
+
+     let id_elements = ["#colorbar_blue", "#colorbar_cyan2blue", "#colorbar_green2cyan", "#colorbar_yellow2green",
                         "#colorbar_red2yellow", "#colorbar_red"];
     let id_slider = "#colorbar_slider"
 
@@ -906,6 +921,7 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    // adjust graphics according to current window dimensions
    adjust_graphics () {
+     // console.log('adjust_graphics is called');
 
     /////////////////////////////////////////////////
     // adjust widths
@@ -935,13 +951,13 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
     $("#colorbar_scale_canvas").attr("width", colorbar_scale_width);
 
     // image
-    let max_scale_y_value_size = Math.round(Math.max(this.getWidthOfText(this.mainService.scale_world_start_y.toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE),
-      this.getWidthOfText((this.mainService.scale_world_start_y + this.mainService.scale_world_range_y)
+    let max_scale_y_value_size = Math.round(Math.max(this.getWidthOfText(this.mainService.scale_world_start_y.toFixed(this.SCALE_DECIMAL_PLACES).toString(),
+      this.SCALE_FONT, this.SCALE_FONTSIZE),  this.getWidthOfText((this.mainService.scale_world_start_y + this.mainService.scale_world_range_y)
         .toFixed(this.SCALE_DECIMAL_PLACES).toString(), this.SCALE_FONT, this.SCALE_FONTSIZE)));
 
     let image_scale_width = graphics_width - (spacer_width + colorbar_slider_width + colorbar_width + colorbar_scale_width);
-     this.image_data_offset_x = this.SCALE_TICKLENGTH + max_scale_y_value_size + this.SCALE_TICK2TEXT_DISTANCE + 2 * this.SCALE_FONTSIZE;
-     this.image_data_size_x = image_scale_width - this.image_data_offset_x - this.SCALE_FONTSIZE;
+    this.image_data_offset_x = this.SCALE_TICKLENGTH + max_scale_y_value_size + this.SCALE_TICK2TEXT_DISTANCE + 2 * this.SCALE_FONTSIZE;
+    this.image_data_size_x = image_scale_width - this.image_data_offset_x - this.SCALE_FONTSIZE;
     $("#grid_graphics_image").css("width", image_scale_width + "px");
     $("#image_scale_canvas").css("width", image_scale_width + "px");
     $("#image_scale_canvas").attr("width", image_scale_width);
@@ -992,6 +1008,8 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
 
    process_graphics_data(data_buffer) {
+     // console.log('process_graphics_data is called');
+
     // cfg_parameters / controls / graphics must be fully configured before
     if ((!this.mainService.status_iscomplete(this.mainService.cfg_parameters_states)) ||
       (!this.mainService.status_iscomplete(this.mainService.controls_states)) ||
@@ -1083,7 +1101,9 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
    // redraw canvas overlays
    update_canvas_overlays() {
-    if(this.mainService.status_iscomplete(this.mainService.graphics_states)) {
+     // console.log('update_canvas_overlays is called');
+
+     if(this.mainService.status_iscomplete(this.mainService.graphics_states)) {
       switch (this.display_mode) {
         case 'R/D Map':
           $("#image_rdmap_canvas").css("z-index", "3");
@@ -1110,9 +1130,11 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   }
 
 
-    // redraw graphics according to current window dimemsions and scale settings
+    // redraw graphics according to current window dimensions and scale settings
    update_graphics() {
-    if(this.mainService.status_iscomplete(this.mainService.graphics_states)) {
+     // console.log('update_graphics is called');
+
+     if(this.mainService.status_iscomplete(this.mainService.graphics_states)) {
       this.draw_scales_rdmap();
 
       this.image_rdmap_canvas.width = this.mainService.data_image_range_x;
@@ -1137,6 +1159,8 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
     // initialize graphics settings
    init_graphics() {
+     // console.log('init_graphics is called');
+
      this.mainService.status_clearall(this.mainService.graphics_states);
 
      this.mainService.nodes_names = [];
@@ -1191,14 +1215,17 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
 
 
 
-  init_window() {
-    this.init_graphics();
-    this.init_controls();
-    this.mainService.init_parameters();
+   init_window() {
+     // console.log('init_window is called');
+     this.init_graphics();
+     this.init_controls();
+     this.mainService.init_parameters();
   }
 
 
-  update_window() {
+   update_window() {
+     // console.log('update_window is called');
+
     this.adjust_graphics();
     this.update_graphics();
     this.update_controls();
@@ -1206,11 +1233,13 @@ export class AppComponent implements AfterViewInit , AfterViewChecked {
   }
 
 
-  gg(event: any) {
+   gg(event: any) {
      console.log('gg called')
      console.log('evnett : ' , event);
   }
 
+
 }  //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 
 
