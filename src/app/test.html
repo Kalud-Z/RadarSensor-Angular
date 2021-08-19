@@ -1,0 +1,17 @@
+<div id="grid_parameters_container" class="box"> <!-- this element being handled by rc_cfg_parameters -->
+    <div *ngFor="let param of this.mainService.cfg_parameter_value"  [id]="['parameter_' + param.name]" class="paramWrapper">
+        <label [for]="['parameter_' + param.name]" >  {{ param.text }} : </label>
+        <ng-container [ngSwitch]="param.type">
+            <input  *ngSwitchCase="'I'"  type='number' [name]="['parameter_input_' + param.name]" [id]="['parameter_input_' + param.name]"
+                    (change)="check_parameter(param)"  [min]="getMinValue(param)"  [max]="getMaxValue(param)" [value]="getValue(param)">
+
+            <!--  TODO : <select , options> the have the correct value. but in the UI the wrong option is selected (always the first one is selected !)  -->
+            <select *ngSwitchCase="'L'" [id]="['parameter_input_' + param.name]"  [value]="[param.current_value]"  (change)="check_parameter(param)">
+                <option  *ngFor="let opt of param.allowed_values.split(this.mainService.TOKEN_DELIMITER)" [value]="[opt]"> {{ opt }} </option>
+            </select>
+
+            <input  *ngSwitchCase="'F'"  type='text' [name]="['parameter_input_' + param.name]" [id]="['parameter_input_' + param.name]"
+                    (change)="check_parameter(param)"  [value]="getValueForOptionF(param)">
+        </ng-container>
+    </div>
+</div>
